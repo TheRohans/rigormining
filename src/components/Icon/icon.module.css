@@ -1,0 +1,16 @@
+.icon {
+  all: revert;
+  fill: currentColor;
+}
+
+.icon.small {
+  @apply h-4 w-4;
+}
+
+.icon.standard {
+  @apply h-5 w-5;
+}
+
+.icon.large {
+  @apply h-10 w-10;
+}

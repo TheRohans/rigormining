@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
-import { Hello } from '@components/Home/Hello';
+import { Icon } from '@components/Icon';
+import React from 'react';
 
-export const initialProps = {
-  bar: 'First',
-  foo: 'Page',
+import Anchor from '../../assets/svg/anchor.svg';
+
+type HomeProps = {
+  foo: string;
+  bar: string;
 };
 
-export default (): JSX.Element => {
-  const [componentProps] = useState(initialProps);
-
-  return <Hello {...componentProps} />;
+export const Home: React.FC<HomeProps> = ({ foo, bar }) => {
+  return (
+    <div className={'text-red-500'}>
+      <Icon>
+        <Anchor />
+      </Icon>
+      Hello from {foo ?? 'foo'} and {bar ?? 'bar'}!
+    </div>
+  );
 };
+
+export default Home;

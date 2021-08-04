@@ -1,15 +1,15 @@
-import Hello from '@components/Home/index';
-import World from '@components/Page2/index';
+import Home from '@components/Home';
+import Login from '@components/Login';
 
 export const routes = [
   {
-    component: Hello,
+    component: Home,
     exact: true,
     path: '/',
   },
   {
-    component: World,
+    component: Login,
     exact: false,
-    path: '/page2',
+    path: '/login',
   },
 ];
