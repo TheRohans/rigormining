@@ -1,5 +1,5 @@
 {
-  "name": "rtjw-boiler",
+  "name": "knotset",
   "version": "0.1.0",
   "description": "React, Typescript, Jest, Tailwind",
   "main": "index.js",
@@ -27,6 +27,7 @@
     "autoprefixer": "^10.3.1",
     "babel-loader": "^8.2.2",
     "css-loader": "^6.2.0",
+    "dotenv-webpack": "^7.0.3",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-css-modules": "^2.11.0",
@@ -50,7 +51,10 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
+    "aws-amplify": "^4.2.2",
     "classnames": "^2.3.1",
+    "dotenv": "^10.0.0",
+    "graphql": "^15.5.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-router-dom": "^5.2.0"

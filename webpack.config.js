@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const Dotenv = require('dotenv-webpack');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -13,7 +14,7 @@ module.exports = {
   entry: {
     main: './src/index.tsx',
   },
-
+  devtool: 'cheap-source-map',
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
@@ -29,19 +30,6 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'ts-loader',
       },
-      /* {
-        test: /\.css$/,
-        loader: [
-          isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-              sourceMap: isDevelopment,
-            },
-          },
-        ],
-      }, */
       {
         test: /\.css$/i,
         include: path.resolve(__dirname, 'src'),
@@ -60,6 +48,13 @@ module.exports = {
         test: /\.svg$/,
         use: ['@svgr/webpack'],
       },
+      // This fixes a bunch of amplify errors
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
   },
   devServer: {
@@ -71,5 +66,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
     }),
+    new Dotenv(),
   ],
 };
