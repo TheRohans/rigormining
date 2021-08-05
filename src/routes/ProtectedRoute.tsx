@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
 
-const isAuthenticated = () => {
+export const isAuthenticated = () => {
   let isAuthed = false;
 
   try {

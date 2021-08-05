@@ -14,7 +14,6 @@ export const Home: React.FC<HomeProps> = ({ foo, bar }) => {
       <Icon>
         <Anchor />
       </Icon>
-      Hello from {foo ?? 'foo'} and {bar ?? 'bar'}!
     </div>
   );
 };

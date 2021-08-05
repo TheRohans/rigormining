@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
-import { ProtectedRoute } from '../../routes/ProtectedRoute';
+import { ProtectedRoute, isAuthenticated } from '../../routes/ProtectedRoute';
 
 import Home from '@components/Home';
 import SignIn from '@components/SignIn';
@@ -8,6 +8,7 @@ import SignUp from '@components/SignUp';
 import SignOut from '@components/SignOut';
 import { SetS3Config } from '../../services';
 import Storage from '@aws-amplify/storage';
+import { Nav } from './Nav';
 
 // import { configureAmplify, SetS3Config } from '../../services';
 // import Storage from '@aws-amplify/storage';
@@ -66,14 +67,8 @@ const PlaceHolder: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <div>
-      <h2>KnotSet.com</h2>
       <Router>
-        <nav>
-          <Link to="/">Home</Link> | <Link to="/signup">Sign Up</Link> | <Link to="/signin">Sign In</Link>
-          <br />
-          <Link to="/dashboard">Dashboard</Link> | <Link to="/signout">Sign Out</Link>
-        </nav>
-        <hr />
+        <Nav authed={isAuthenticated()} />
 
         <Route exact path="/" component={Home} />
         <Route exact path="/signin" component={SignIn} />
