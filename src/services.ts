@@ -5,9 +5,16 @@ export function configureAmplify() {
   Amplify.configure(
     {
       Auth: {
+        // REQUIRED only for Federated Authentication - Amazon Cognito Identity Pool ID
         identityPoolId: process.env.KNOTSET_identityPoolId,
+        // REQUIRED - Amazon Cognito Region
         region: process.env.KNOTSET_region,
+        // OPTIONAL - Amazon Cognito Federated Identity Pool Region
+        // Required only if it's different from Amazon Cognito Region
+        identityPoolRegion: process.env.KNOTSET_region,
+        // OPTIONAL - Amazon Cognito User Pool ID
         userPoolId: process.env.KNOTSET_userPoolId,
+        // OPTIONAL - Amazon Cognito Web Client ID (26-char alphanumeric string)
         userPoolWebClientId: process.env.KNOTSET_userPoolWebClientId,
       },
       Storage: {
