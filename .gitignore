@@ -2,3 +2,5 @@ node_modules
 test-coverage
 .env
 dist
+*.epub
+*.pdf

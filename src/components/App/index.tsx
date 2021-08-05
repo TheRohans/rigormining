@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
 import { ProtectedRoute } from '../../routes/ProtectedRoute';
 
@@ -13,6 +13,8 @@ import Storage from '@aws-amplify/storage';
 // import Storage from '@aws-amplify/storage';
 
 const PlaceHolder: React.FC = () => {
+  const [booklist, setBookList] = useState([]);
+
   useEffect(() => {
     SetS3Config('private.knotset.com', 'public');
 
@@ -30,14 +32,35 @@ const PlaceHolder: React.FC = () => {
     })
       .then((v) => (v as any)?.Body?.text())
       .then((v) => {
-        console.log(v);
+        const json = JSON.parse(v);
+        setBookList(json.children);
       })
       .catch((e) => {
         console.error(e);
       });
-  });
+  }, []);
 
-  return <h1>hi</h1>;
+  const downloadBook = (name: string) => {
+    Storage.get(`library/rohan/${name}`, {
+      level: 'public',
+    })
+      .then((v) => {
+        window.location.href = v as string;
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  return (
+    <div>
+      {booklist.map((b: any) => (
+        <div key={b.name}>
+          <a onClick={() => downloadBook(b?.name)}>{b?.name}</a>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export const App: React.FC = () => {
