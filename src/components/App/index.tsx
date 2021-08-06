@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
-import { ProtectedRoute, isAuthenticated } from '../../routes/ProtectedRoute';
+import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import { ProtectedRoute, useAuth } from '../../routes/ProtectedRoute';
 
 import Home from '@components/Home';
 import SignIn from '@components/SignIn';
@@ -8,7 +8,7 @@ import SignUp from '@components/SignUp';
 import SignOut from '@components/SignOut';
 import { SetS3Config } from '../../services';
 import Storage from '@aws-amplify/storage';
-import { Nav } from './Nav';
+import Navigation from './Navigation';
 
 // import { configureAmplify, SetS3Config } from '../../services';
 // import Storage from '@aws-amplify/storage';
@@ -65,18 +65,22 @@ const PlaceHolder: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-  return (
-    <div>
-      <Router>
-        <Nav authed={isAuthenticated()} />
+  const loggedIn = useAuth();
 
-        <Route exact path="/" component={Home} />
-        <Route exact path="/signin" component={SignIn} />
-        <Route exact path="/signup" component={SignUp} />
-        <Route exact path="/signout" component={SignOut} />
-        <ProtectedRoute exact path="/dashboard" component={PlaceHolder} />
+  return (
+    <>
+      <Router>
+        {/* <Nav authed={isAuthenticated()} /> */}
+        <Navigation loggedIn={loggedIn} />
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route exact path="/signin" component={SignIn} />
+          <Route exact path="/signup" component={SignUp} />
+          <Route exact path="/signout" component={SignOut} />
+          <ProtectedRoute exact path="/dashboard" component={PlaceHolder} />
+        </Switch>
       </Router>
-    </div>
+    </>
   );
 };
 

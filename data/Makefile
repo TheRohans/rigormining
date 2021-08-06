@@ -6,7 +6,7 @@ build:
 		node toMeta.js . > metadata.json
 	cat ./public/public/library/rohan/metadata.json
 
-publish:
+publish: build
 	aws s3 sync --delete --region us-west-2 \
 		--cache-control max-age=604800 \
 		--acl bucket-owner-full-control \

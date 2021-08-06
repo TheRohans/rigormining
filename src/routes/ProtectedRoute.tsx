@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
+import React from 'react';
+import { Redirect, Route } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
 
-export const isAuthenticated = () => {
+export const useAuth = () => {
   let isAuthed = false;
 
   try {
@@ -24,7 +24,7 @@ export const isAuthenticated = () => {
       })
       .catch((e) => {
         localStorage.removeItem('isAuthenticated');
-        console.error('er', e);
+        // console.error('er', e);
       });
   }
 
@@ -32,15 +32,13 @@ export const isAuthenticated = () => {
 };
 
 export const ProtectedRoute = (props: any) => {
+  const loggedIn = useAuth();
+
   return (
     <Route
       path={props.path}
       render={(data) =>
-        isAuthenticated() ? (
-          <props.component {...data}></props.component>
-        ) : (
-          <Redirect to={{ pathname: '/signin' }}></Redirect>
-        )
+        loggedIn ? <props.component {...data}></props.component> : <Redirect to={{ pathname: '/signin' }}></Redirect>
       }
     ></Route>
   );
