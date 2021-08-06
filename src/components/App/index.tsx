@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
 import { ProtectedRoute } from '../../routes/ProtectedRoute';
 
@@ -37,24 +37,26 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <Navigation loggedIn={loggedIn} />
 
-      <Route exact path="/" component={Home} />
+      <Switch>
+        <Route exact path="/" component={Home} />
 
-      <div className="py-10">
-        <main>
-          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <Route exact path="/signin">
-              <SignIn logIn={logIn} />
-            </Route>
-            <Route exact path="/signout">
-              <SignOut logOut={logOut} />
-            </Route>
+        <div className="py-10">
+          <main>
+            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+              <Route exact path="/signin">
+                <SignIn logIn={logIn} />
+              </Route>
+              <Route exact path="/signout">
+                <SignOut logOut={logOut} />
+              </Route>
 
-            <Route exact path="/signup" component={SignUp} />
+              <Route exact path="/signup" component={SignUp} />
 
-            <ProtectedRoute exact loggedIn={loggedIn} path="/dashboard" component={Library} />
-          </div>
-        </main>
-      </div>
+              <ProtectedRoute exact loggedIn={loggedIn} path="/dashboard" component={Library} />
+            </div>
+          </main>
+        </div>
+      </Switch>
     </BrowserRouter>
   );
 };
