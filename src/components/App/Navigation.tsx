@@ -1,27 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Fragment } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import { Link } from 'react-router-dom';
 
-const navigation = [
-  { name: 'Dashboard', to: '/dashboard', current: true },
-  // { name: 'Team', to: '#', current: false },
-  // { name: 'Projects', href: '#', current: false },
-  // { name: 'Calendar', href: '#', current: false },
-];
+const navigation = [{ name: 'Dashboard', to: '/dashboard', current: true }];
 
-function classNames(...classes: any) {
+const classNames = (...classes: any) => {
   return classes.filter(Boolean).join(' ');
-}
+};
 
 type NavProps = {
   loggedIn: boolean;
 };
 
 export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
-  console.error(loggedIn);
-
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -178,8 +171,5 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
     </Disclosure>
   );
 };
-function setState(arg0: boolean): [any] {
-  throw new Error('Function not implemented.');
-}
 
 export default Navigation;

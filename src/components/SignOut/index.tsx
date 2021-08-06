@@ -1,12 +1,14 @@
 import React from 'react';
-import { Auth } from 'aws-amplify';
 import { useHistory } from 'react-router-dom';
 
-export const SignOut: React.FC = () => {
+type SignOutProps = {
+  logOut: () => Promise<void>;
+};
+
+export const SignOut: React.FC<SignOutProps> = ({ logOut }) => {
   const history = useHistory();
 
-  Auth.signOut().then(() => {
-    localStorage.removeItem('isAuthenticated');
+  logOut().then(() => {
     history.push('/');
   });
 
