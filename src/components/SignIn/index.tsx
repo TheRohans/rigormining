@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { LockClosedIcon } from '@heroicons/react/solid';
+import { LockClosedIcon, RefreshIcon } from '@heroicons/react/solid';
+
+import Error from '../Alerts/Error';
 
 type SignInProps = {
   logIn: (email: string, password: string) => Promise<any>;
 };
 
 export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState('');
+
   const history = useHistory();
 
   const [email, setEmail] = useState('');
@@ -14,15 +19,19 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
 
   const signIn = (e: any): boolean => {
     e.preventDefault();
+    setWorking(true);
+    setError('');
     logIn(email, password)
       .then((u) => {
         setEmail('');
         setPassword('');
         history.push('/dashboard');
-        console.log('done');
+        setWorking(false);
       })
       .catch((e) => {
         console.error(e);
+        setError(e.message);
+        setWorking(false);
       });
 
     return false;
@@ -38,13 +47,10 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
             alt="Workflow"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
-          {/* <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-              start your 14-day free trial
-            </a>
-          </p> */}
         </div>
+
+        {error.length > 0 && <Error text={error} />}
+
         <form className="mt-8 space-y-6" onSubmit={signIn}>
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="rounded-md shadow-sm -space-y-px">
@@ -103,10 +109,21 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                working ? 'cursor-wait' : ''
+              }`}
+              disabled={working}
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <LockClosedIcon className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
+                {!working && (
+                  <LockClosedIcon className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
+                )}
+                {working && (
+                  <RefreshIcon
+                    className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 animate-spin"
+                    aria-hidden="true"
+                  />
+                )}
               </span>
               Sign in
             </button>
