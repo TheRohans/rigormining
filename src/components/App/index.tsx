@@ -52,7 +52,7 @@ export const App: React.FC = () => {
 
               <Route exact path="/signup" component={SignUp} />
 
-              <ProtectedRoute exact loggedIn={loggedIn} path="/dashboard" component={Library} />
+              <ProtectedRoute exact loggedIn={loggedIn} path="/library" component={Library} />
             </div>
           </main>
         </div>

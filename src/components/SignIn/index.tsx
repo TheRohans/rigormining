@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { LockClosedIcon, RefreshIcon } from '@heroicons/react/solid';
+import { LockClosedIcon, KeyIcon } from '@heroicons/react/solid';
 
 import Error from '../Alerts/Error';
 
@@ -25,7 +25,7 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
       .then((u) => {
         setEmail('');
         setPassword('');
-        history.push('/dashboard');
+        history.push('/library');
         setWorking(false);
       })
       .catch((e) => {
@@ -46,7 +46,7 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
             src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
             alt="Workflow"
           />
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your library</h2>
         </div>
 
         {error.length > 0 && <Error text={error} />}
@@ -67,6 +67,7 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={working}
               />
             </div>
             <div>
@@ -82,6 +83,7 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={working}
               />
             </div>
           </div>
@@ -120,7 +122,7 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
                   <LockClosedIcon className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
                 )}
                 {working && (
-                  <RefreshIcon
+                  <KeyIcon
                     className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 animate-spin"
                     aria-hidden="true"
                   />
