@@ -4,3 +4,4 @@ test-coverage
 dist
 *.epub
 *.pdf
+data/public/**/*.png
