@@ -1,15 +1,17 @@
 PHONY: clean build
 
+hash = $(shell git log --pretty=format:'%h' -n 1)
+
 clean:
 	rm -rf dist
 
-build:
-	yarn build
+build: clean
+	yarn build --env KNOTSET_VERSION=$(hash)
 
 start:
-	yarn start
+	yarn start --env KNOTSET_VERSION=$(hash)
 
-publish: clean build
+publish: build
 	aws s3 sync --delete --region us-west-2 \
 		--cache-control max-age=604800 \
 		dist s3://knotset.com/

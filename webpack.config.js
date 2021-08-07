@@ -8,7 +8,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 module.exports = {
   output: {
     path: path.join(__dirname, './dist'),
-    filename: 'app.min.js',
+    filename: 'knotset.[hash].js',
   },
 
   entry: {
