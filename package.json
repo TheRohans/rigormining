@@ -58,6 +58,7 @@
     "aws-amplify": "^4.2.2",
     "classnames": "^2.3.1",
     "dotenv": "^10.0.0",
+    "epubjs": "^0.3.88",
     "graphql": "^15.5.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",

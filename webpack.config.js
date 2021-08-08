@@ -8,7 +8,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 module.exports = {
   output: {
     path: path.join(__dirname, './dist'),
-    filename: 'knotset.[hash].js',
+    filename: 'knotset.[fullhash].js',
   },
 
   entry: {
@@ -60,6 +60,14 @@ module.exports = {
   devServer: {
     port: 8080,
     watchContentBase: true,
+  },
+  externals: {
+    // react: 'react',
+    // epubjs: {
+    //   amd: 'epubjs',
+    //   commonjs: 'epubjs',
+    //   root: '_',
+    // },
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
