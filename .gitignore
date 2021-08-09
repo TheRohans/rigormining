@@ -5,3 +5,4 @@ dist
 *.epub
 *.pdf
 data/public/**/*.png
+pdf.worker.js

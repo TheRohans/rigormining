@@ -86,14 +86,13 @@ export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadB
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{book.name}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{typeBadge(book.type)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          {book.type === 'pub' && (
-                            <button
-                              onClick={() => visitBook(book.name, book.type)}
-                              className="text-indigo-600 mr-2 hover:text-indigo-900"
-                            >
-                              <EyeIcon className="h-4 w-4" aria-hidden="true" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => visitBook(book.name, book.type)}
+                            className="text-indigo-600 mr-2 hover:text-indigo-900"
+                          >
+                            <EyeIcon className="h-4 w-4" aria-hidden="true" />
+                          </button>
+
                           <button
                             onClick={() => downloadBookByName(book.name)}
                             className="text-indigo-600 hover:text-indigo-900"

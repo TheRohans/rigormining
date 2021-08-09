@@ -49,17 +49,20 @@
     "typescript": "^3.9.7",
     "webpack": "^5.48.0",
     "webpack-cli": "^4.7.2",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^3.11.2",
+    "worker-loader": "^3.0.8"
   },
   "dependencies": {
     "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.3",
     "@tailwindcss/forms": "^0.3.3",
+    "@types/pdfjs-dist": "^2.7.4",
     "aws-amplify": "^4.2.2",
     "classnames": "^2.3.1",
     "dotenv": "^10.0.0",
     "epubjs": "^0.3.88",
     "graphql": "^15.5.1",
+    "pdfjs-dist": "^2.9.359",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-router-dom": "^5.2.0"

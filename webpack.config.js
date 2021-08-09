@@ -55,6 +55,13 @@ module.exports = {
           fullySpecified: false,
         },
       },
+      {
+        test: /\.worker\.(c|m)?js$/i,
+        loader: 'worker-loader',
+        options: {
+          filename: '[name].[contenthash].worker.js',
+        },
+      },
     ],
   },
   devServer: {

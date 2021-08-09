@@ -1,16 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { BookProps } from './Book';
 import ePub, { Rendition } from 'epubjs';
 import { ChevronLeftIcon, ChevronRightIcon, CloudDownloadIcon, XCircleIcon } from '@heroicons/react/solid';
 
 import styles from './bookepub.module.css';
-
-type BookProps = {
-  type: 'epub' | 'pdf';
-  url: string;
-  loc?: number;
-  closeBook: () => void;
-  downloadBook: (url: string) => void;
-};
 
 export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downloadBook }) => {
   const [rendition, setRendition] = useState<Rendition>();
@@ -89,10 +82,15 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
       rendLocal.on('keyup', keyListener);
       rendLocal.on('selected', selectedRange);
     });
+
+    document.addEventListener('keyup', keyListener, false);
+
+    return () => {
+      document.removeEventListener('keyup', keyListener);
+    };
   }, [url]);
 
   // kind of dodgy
-  document.addEventListener('keyup', keyListener, false);
 
   return (
     <div>

@@ -2,19 +2,20 @@ import React, { useState } from 'react';
 import { SetS3Config } from '../../services';
 import Storage from '@aws-amplify/storage';
 import { ShelfList } from './ShelfList';
-import Book from './Book';
+import Book, { BookFormats } from './Book';
 
 export const Library: React.FC = () => {
   const [currentBook, setCurrentBook] = useState<string>('');
+  const [currentBookType, setCurrentBookType] = useState<BookFormats>(undefined);
 
   SetS3Config('private.knotset.com', 'public');
   const path = 'library/rohan';
 
-  const viewBook = (name: string) => {
+  const viewBook = (name: string, contentType: string) => {
     Storage.get(`${path}/${name}`, {
       level: 'public',
       download: false,
-      contentType: 'application/epub+zip',
+      contentType,
     })
       .then((v) => {
         console.log(v);
@@ -40,16 +41,20 @@ export const Library: React.FC = () => {
   const visitBook = (name: string, type: string) => {
     switch (type) {
       case 'pub':
-        viewBook(name);
+        setCurrentBookType('epub');
+        viewBook(name, 'application/epub+zip');
         break;
       case 'pdf':
-        fetchBook(name);
+        setCurrentBookType('pdf');
+        viewBook(name, 'application/pdf');
+        // fetchBook(name);
         break;
     }
   };
 
   const closeBook = () => {
     setCurrentBook('');
+    setCurrentBookType(undefined);
   };
 
   const downloadBook = (url: string) => {
@@ -60,7 +65,7 @@ export const Library: React.FC = () => {
     <div className="flex flex-col">
       {currentBook.length <= 0 && <ShelfList path={path} visitBook={visitBook} downloadBookByName={fetchBook} />}
       {currentBook.length > 0 && (
-        <Book type="epub" url={currentBook} closeBook={closeBook} downloadBook={downloadBook} />
+        <Book type={currentBookType} url={currentBook} closeBook={closeBook} downloadBook={downloadBook} />
       )}
     </div>
   );
