@@ -34,7 +34,7 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
     pdf.getPage(pageNum).then((page) => {
       console.log('Page loaded');
 
-      const scale = 1.5;
+      const scale = 1;
       const viewport = page.getViewport({ scale: scale });
 
       // Prepare canvas using PDF page dimensions
