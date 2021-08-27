@@ -4,9 +4,11 @@ import ePub, { Rendition } from 'epubjs';
 import { ChevronLeftIcon, ChevronRightIcon, CloudDownloadIcon, XCircleIcon } from '@heroicons/react/solid';
 
 import styles from './bookepub.module.css';
+import Loader from './Loader';
 
 export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downloadBook }) => {
   const [rendition, setRendition] = useState<Rendition>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   const refDisplay = useRef<HTMLDivElement>();
   var currentSectionIndex = loc ? loc : undefined;
@@ -81,6 +83,8 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
     book.ready.then(() => {
       rendLocal.on('keyup', keyListener);
       rendLocal.on('selected', selectedRange);
+
+      setLoading(false);
     });
 
     document.addEventListener('keyup', keyListener, false);
@@ -95,7 +99,7 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
   return (
     <div>
       <header>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold leading-tight text-gray-900">
             <button
               type="button"
@@ -104,13 +108,13 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
             >
               <XCircleIcon className="h-4 w-4" aria-hidden="true" />
             </button>
-            <button
+            {/* <button
               type="button"
               className="inline-flex items-center mx-2 px-2 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               onClick={() => downloadBook(url)}
             >
               <CloudDownloadIcon className="h-4 w-4" aria-hidden="true" />
-            </button>
+            </button> */}
 
             <span className="relative z-0 inline-flex shadow-sm rounded-md">
               <button
@@ -135,16 +139,10 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
       </header>
       <main>
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          {/* Replace with your content */}
           <div className="px-2 py-2 sm:px-0">
-            {/* <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" /> */}
-            <div
-              id="bookarea"
-              className={`border-4 border-dashed border-gray-200 rounded-lg ${styles.bookDisplay}`}
-              ref={refDisplay}
-            ></div>
+            {loading && <Loader />}
+            <div id="bookarea" className={`rounded-lg ${styles.bookDisplay}`} ref={refDisplay}></div>
           </div>
-          {/* /End replace */}
         </div>
       </main>
     </div>

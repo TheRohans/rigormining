@@ -35,27 +35,31 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
-      <Navigation loggedIn={loggedIn} />
-
       <Switch>
-        <Route exact path="/" component={Home} />
+        <Route exact path="/">
+          <Navigation loggedIn={loggedIn} />
+          <Home />
+        </Route>
 
-        <div className="py-10">
-          <main>
-            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-              <Route exact path="/signin">
+        <Route exact path="/signin">
+          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {/* <Navigation loggedIn={loggedIn} /> */}
+            <div className="py-10">
+              <main>
                 <SignIn logIn={logIn} />
-              </Route>
-              <Route exact path="/signout">
-                <SignOut logOut={logOut} />
-              </Route>
-
-              <Route exact path="/signup" component={SignUp} />
-
-              <ProtectedRoute exact loggedIn={loggedIn} path="/library" component={Library} />
+              </main>
             </div>
-          </main>
-        </div>
+          </div>
+        </Route>
+
+        <Route exact path="/signout">
+          {/* <Navigation loggedIn={loggedIn} /> */}
+          <SignOut logOut={logOut} />
+        </Route>
+
+        <Route exact path="/signup" component={SignUp} />
+
+        <ProtectedRoute exact loggedIn={loggedIn} path="/library" component={Library} />
       </Switch>
     </BrowserRouter>
   );

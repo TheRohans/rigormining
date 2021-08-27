@@ -2,12 +2,7 @@ import React from 'react';
 import styles from './home.module.css';
 import bgImage from '../../assets/img/books.jpg';
 
-type HomeProps = {
-  foo: string;
-  bar: string;
-};
-
-export const Home: React.FC<HomeProps> = ({ foo, bar }) => {
+export const Home: React.FC = () => {
   return (
     <div
       className={`contenair bg-cover w-full flex justify-center items-center ${styles.homeBackground}`}

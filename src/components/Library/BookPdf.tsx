@@ -5,11 +5,14 @@ import * as PDFJS from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 
 import styles from './bookpdf.module.css';
+import Loader from './Loader';
 
 export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downloadBook }) => {
   const refDisplay = useRef<HTMLCanvasElement>();
   const [currentPdf, setCurrentPdf] = useState<PDFDocumentProxy>();
   const [page, setPage] = useState<number>(1);
+
+  const [loading, setLoading] = useState<boolean>(true);
 
   PDFJS.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
   const task = PDFJS.getDocument(url);
@@ -34,7 +37,7 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
     pdf.getPage(pageNum).then((page) => {
       console.log('Page loaded');
 
-      const scale = 1;
+      const scale = 1.15;
       const viewport = page.getViewport({ scale: scale });
 
       // Prepare canvas using PDF page dimensions
@@ -95,6 +98,7 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
         console.log('pdf loaded');
         setCurrentPdf(pdf);
         renderPage(pdf, 1);
+        setLoading(false);
       })
       .catch((err) => {
         console.error(err);
@@ -108,9 +112,9 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
   }, []);
 
   return (
-    <div>
+    <>
       <header>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold leading-tight text-gray-900">
             <button
               type="button"
@@ -119,13 +123,13 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
             >
               <XCircleIcon className="h-4 w-4" aria-hidden="true" />
             </button>
-            <button
+            {/* <button
               type="button"
               className="inline-flex items-center mx-2 px-2 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               onClick={() => downloadBook(url)}
             >
               <CloudDownloadIcon className="h-4 w-4" aria-hidden="true" />
-            </button>
+            </button> */}
 
             <span className="relative z-0 inline-flex shadow-sm rounded-md">
               <button
@@ -149,18 +153,17 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
         </div>
       </header>
       <main>
-        {/* <div className="max-w-7xl mx-auto sm:px-6 lg:px-8"> */}
-        <div style={{ position: 'relative' }} className="px-2 py-2 sm:px-0">
-          <canvas
-            id="pdfarea"
-            className={`border-4 border-dashed border-gray-200 rounded-lg ${styles.bookDisplay}`}
-            ref={refDisplay}
-          ></canvas>
-          <div className="textLayer"></div>
+        <div style={{ position: 'relative' }} className="flex justify-center px-2 py-2 sm:px-0">
+          {loading && <Loader />}
+          {!loading && (
+            <>
+              <canvas id="pdfarea" className={`rounded-lg ${styles.bookDisplay}`} ref={refDisplay}></canvas>
+              <div className="textLayer"></div>
+            </>
+          )}
         </div>
-        {/* </div> */}
       </main>
-    </div>
+    </>
   );
 };
 

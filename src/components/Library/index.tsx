@@ -3,6 +3,7 @@ import { SetS3Config } from '../../services';
 import Storage from '@aws-amplify/storage';
 import { ShelfList } from './ShelfList';
 import Book, { BookFormats } from './Book';
+import Navigation from '@components/App/Navigation';
 
 export const Library: React.FC = () => {
   const [currentBook, setCurrentBook] = useState<string>('');
@@ -62,12 +63,27 @@ export const Library: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      {currentBook.length <= 0 && <ShelfList path={path} visitBook={visitBook} downloadBookByName={fetchBook} />}
+    <>
+      {currentBook.length <= 0 && (
+        <>
+          <Navigation loggedIn={true} />
+          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div className="py-10">
+              <main>
+                <div className="flex flex-col">
+                  {currentBook.length <= 0 && (
+                    <ShelfList path={path} visitBook={visitBook} downloadBookByName={fetchBook} />
+                  )}
+                </div>
+              </main>
+            </div>
+          </div>
+        </>
+      )}
       {currentBook.length > 0 && (
         <Book type={currentBookType} url={currentBook} closeBook={closeBook} downloadBook={downloadBook} />
       )}
-    </div>
+    </>
   );
 };
 
