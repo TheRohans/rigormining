@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
 import { createHighlight, updateHighlight, deleteHighlight } from '../../graphql/mutations';
 import { listHighlights } from '../../graphql/queries';
@@ -26,7 +26,9 @@ export const Highlights: React.FC = () => {
     setHighlights((r as any)?.data?.listHighlights?.items);
   };
 
-  getHighlights();
+  useEffect(() => {
+    getHighlights();
+  }, []);
 
   return (
     <div>
