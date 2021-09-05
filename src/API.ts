@@ -1,0 +1,361 @@
+/* tslint:disable */
+/* eslint-disable */
+//  This file was automatically generated and should not be edited.
+
+export type CreateHighlightInput = {
+  id?: string | null,
+  type?: HighlightType | null,
+  deviceType?: DeviceType | null,
+  title?: string | null,
+  isbn?: string | null,
+  author?: string | null,
+  page?: number | null,
+  startOffset?: number | null,
+  text?: string | null,
+  annotation?: string | null,
+  annotationExtra?: string | null,
+};
+
+export enum HighlightType {
+  Annotation = "Annotation",
+  Highlight = "Highlight",
+}
+
+
+export enum DeviceType {
+  Kindle = "Kindle",
+  Kobo = "Kobo",
+  Pdf = "Pdf",
+  Epub = "Epub",
+}
+
+
+export type ModelHighlightConditionInput = {
+  type?: ModelHighlightTypeInput | null,
+  deviceType?: ModelDeviceTypeInput | null,
+  title?: ModelStringInput | null,
+  isbn?: ModelStringInput | null,
+  author?: ModelStringInput | null,
+  page?: ModelIntInput | null,
+  startOffset?: ModelIntInput | null,
+  text?: ModelStringInput | null,
+  annotation?: ModelStringInput | null,
+  annotationExtra?: ModelStringInput | null,
+  and?: Array< ModelHighlightConditionInput | null > | null,
+  or?: Array< ModelHighlightConditionInput | null > | null,
+  not?: ModelHighlightConditionInput | null,
+};
+
+export type ModelHighlightTypeInput = {
+  eq?: HighlightType | null,
+  ne?: HighlightType | null,
+};
+
+export type ModelDeviceTypeInput = {
+  eq?: DeviceType | null,
+  ne?: DeviceType | null,
+};
+
+export type ModelStringInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
+};
+
+export enum ModelAttributeTypes {
+  binary = "binary",
+  binarySet = "binarySet",
+  bool = "bool",
+  list = "list",
+  map = "map",
+  number = "number",
+  numberSet = "numberSet",
+  string = "string",
+  stringSet = "stringSet",
+  _null = "_null",
+}
+
+
+export type ModelSizeInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+};
+
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type UpdateHighlightInput = {
+  id: string,
+  type?: HighlightType | null,
+  deviceType?: DeviceType | null,
+  title?: string | null,
+  isbn?: string | null,
+  author?: string | null,
+  page?: number | null,
+  startOffset?: number | null,
+  text?: string | null,
+  annotation?: string | null,
+  annotationExtra?: string | null,
+};
+
+export type DeleteHighlightInput = {
+  id?: string | null,
+};
+
+export type ModelHighlightFilterInput = {
+  id?: ModelIDInput | null,
+  type?: ModelHighlightTypeInput | null,
+  deviceType?: ModelDeviceTypeInput | null,
+  title?: ModelStringInput | null,
+  isbn?: ModelStringInput | null,
+  author?: ModelStringInput | null,
+  page?: ModelIntInput | null,
+  startOffset?: ModelIntInput | null,
+  text?: ModelStringInput | null,
+  annotation?: ModelStringInput | null,
+  annotationExtra?: ModelStringInput | null,
+  and?: Array< ModelHighlightFilterInput | null > | null,
+  or?: Array< ModelHighlightFilterInput | null > | null,
+  not?: ModelHighlightFilterInput | null,
+};
+
+export type ModelIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
+};
+
+export type CreateHighlightMutationVariables = {
+  input: CreateHighlightInput,
+  condition?: ModelHighlightConditionInput | null,
+};
+
+export type CreateHighlightMutation = {
+  createHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type UpdateHighlightMutationVariables = {
+  input: UpdateHighlightInput,
+  condition?: ModelHighlightConditionInput | null,
+};
+
+export type UpdateHighlightMutation = {
+  updateHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type DeleteHighlightMutationVariables = {
+  input: DeleteHighlightInput,
+  condition?: ModelHighlightConditionInput | null,
+};
+
+export type DeleteHighlightMutation = {
+  deleteHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type GetHighlightQueryVariables = {
+  id: string,
+};
+
+export type GetHighlightQuery = {
+  getHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type ListHighlightsQueryVariables = {
+  filter?: ModelHighlightFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListHighlightsQuery = {
+  listHighlights:  {
+    __typename: "ModelHighlightConnection",
+    items:  Array< {
+      __typename: "Highlight",
+      id: string,
+      type: HighlightType | null,
+      deviceType: DeviceType | null,
+      title: string | null,
+      isbn: string | null,
+      author: string | null,
+      page: number | null,
+      startOffset: number | null,
+      text: string | null,
+      annotation: string | null,
+      annotationExtra: string | null,
+      createdAt: string,
+      updatedAt: string,
+      owner: string | null,
+    } | null > | null,
+    nextToken: string | null,
+  } | null,
+};
+
+export type OnCreateHighlightSubscriptionVariables = {
+  owner: string,
+};
+
+export type OnCreateHighlightSubscription = {
+  onCreateHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type OnUpdateHighlightSubscriptionVariables = {
+  owner: string,
+};
+
+export type OnUpdateHighlightSubscription = {
+  onUpdateHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type OnDeleteHighlightSubscriptionVariables = {
+  owner: string,
+};
+
+export type OnDeleteHighlightSubscription = {
+  onDeleteHighlight:  {
+    __typename: "Highlight",
+    id: string,
+    type: HighlightType | null,
+    deviceType: DeviceType | null,
+    title: string | null,
+    isbn: string | null,
+    author: string | null,
+    page: number | null,
+    startOffset: number | null,
+    text: string | null,
+    annotation: string | null,
+    annotationExtra: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};

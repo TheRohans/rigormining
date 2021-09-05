@@ -1,0 +1,31 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-knotsetcom-dev-111737-authRole",
+      "UnauthRoleArn": "arn:aws:iam::423616671132:role/amplify-knotsetcom-dev-111737-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::423616671132:role/amplify-knotsetcom-dev-111737-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-knotsetcom-dev-111737-deployment",
+      "UnauthRoleName": "amplify-knotsetcom-dev-111737-unauthRole",
+      "StackName": "amplify-knotsetcom-dev-111737",
+      "StackId": "arn:aws:cloudformation:us-west-2:423616671132:stack/amplify-knotsetcom-dev-111737/4dce9770-0dd6-11ec-89f5-021cb123b7ed",
+      "AmplifyAppId": "d2y53gbws9pu6e"
+    },
+    "categories": {
+      "auth": {
+        "knotsetcom6c9495b7": {
+          "userPoolId": "us-west-2_LNw6Y7HYg",
+          "userPoolName": "knotset.com",
+          "webClientId": "19vgdm3lic8415h92k9h4e1j1b",
+          "nativeClientId": "57s2214lo4lhhn36glb4hin7u4"
+        }
+      },
+      "storage": {
+        "knotsetcome981f609": {
+          "bucketName": "private.knotset.com",
+          "region": "us-west-2"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+# type Task
+#   @model
+#   @auth(
+#     rules: [
+#       { allow: groups, groups: ["Managers"], queries: null, mutations: [create, update, delete] }
+#       { allow: groups, groups: ["Employees"], queries: [get, list], mutations: null }
+#     ]
+#   ) {
+#   id: ID!
+#   title: String!
+#   description: String
+#   status: String
+# }
+# type PrivateNote @model @auth(rules: [{ allow: owner }]) {
+#   id: ID!
+#   content: String!
+# }
+
+enum HighlightType {
+  Annotation
+  Highlight
+}
+
+enum DeviceType {
+  Kindle
+  Kobo
+  Pdf
+  Epub
+}
+
+type Highlight @model @auth(rules: [{ allow: owner }]) {
+  # LTc4NjYwMDA5NQ==
+  id: ID!
+  type: HighlightType
+  deviceType: DeviceType
+  title: String
+  isbn: String
+  author: String
+  page: Int
+  startOffset: Int
+  text: String
+  annotation: String
+  annotationExtra: String
+}

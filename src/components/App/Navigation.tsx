@@ -6,7 +6,10 @@ import { Link } from 'react-router-dom';
 
 import unknown from '../../assets/img/unknown.jpg';
 
-const navigation = [{ name: 'Library', to: '/library', current: true }];
+const navigation = [
+  { name: 'Library', to: '/library', current: true },
+  { name: 'Cards', to: '/cards', current: true },
+];
 
 const classNames = (...classes: any) => {
   return classes.filter(Boolean).join(' ');
