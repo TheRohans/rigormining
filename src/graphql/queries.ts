@@ -13,9 +13,11 @@ export const getHighlight = /* GraphQL */ `
       author
       page
       startOffset
+      endOffset
       text
       annotation
       annotationExtra
+      date
       createdAt
       updatedAt
       owner
@@ -38,9 +40,11 @@ export const listHighlights = /* GraphQL */ `
         author
         page
         startOffset
+        endOffset
         text
         annotation
         annotationExtra
+        date
         createdAt
         updatedAt
         owner

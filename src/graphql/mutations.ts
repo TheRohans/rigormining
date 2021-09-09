@@ -16,9 +16,11 @@ export const createHighlight = /* GraphQL */ `
       author
       page
       startOffset
+      endOffset
       text
       annotation
       annotationExtra
+      date
       createdAt
       updatedAt
       owner
@@ -39,9 +41,11 @@ export const updateHighlight = /* GraphQL */ `
       author
       page
       startOffset
+      endOffset
       text
       annotation
       annotationExtra
+      date
       createdAt
       updatedAt
       owner
@@ -62,9 +66,11 @@ export const deleteHighlight = /* GraphQL */ `
       author
       page
       startOffset
+      endOffset
       text
       annotation
       annotationExtra
+      date
       createdAt
       updatedAt
       owner
