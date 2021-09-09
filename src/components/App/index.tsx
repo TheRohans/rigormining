@@ -9,6 +9,7 @@ import SignUp from '@components/SignUp';
 import SignOut from '@components/SignOut';
 import Library from '@components/Library';
 import Highlights from '@components/Highlights';
+import Import from '@components/Highlights/import';
 
 import Navigation from './Navigation';
 
@@ -61,7 +62,8 @@ export const App: React.FC = () => {
         <Route exact path="/signup" component={SignUp} />
 
         <ProtectedRoute exact loggedIn={loggedIn} path="/library" component={Library} />
-        <ProtectedRoute exact loggedIn={loggedIn} path="/cards" component={Highlights} />
+        <ProtectedRoute exact loggedIn={loggedIn} path="/highlights" component={Highlights} />
+        <ProtectedRoute exact loggedIn={loggedIn} path="/import" component={Import} />
       </Switch>
     </BrowserRouter>
   );

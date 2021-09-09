@@ -8,7 +8,8 @@ import unknown from '../../assets/img/unknown.jpg';
 
 const navigation = [
   { name: 'Library', to: '/library', current: true },
-  { name: 'Cards', to: '/cards', current: true },
+  { name: 'Highlights', to: '/highlights', current: true },
+  { name: 'Import', to: '/import', current: true },
 ];
 
 const classNames = (...classes: any) => {
