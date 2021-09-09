@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
-import { createHighlight, updateHighlight, deleteHighlight } from '../../graphql/mutations';
-import { listHighlights } from '../../graphql/queries';
-import { DeviceType, HighlightType } from '../../API';
+import { createHighlight, updateHighlight } from '../../graphql/mutations';
+// import { listHighlights } from '../../graphql/queries';
+// import { DeviceType, HighlightType } from '../../API';
 import { Highlight, HighlightList, DeviceList } from './types';
 import Navigation from '@components/App/Navigation';
 
@@ -14,7 +14,7 @@ export const Import: React.FC = () => {
     {
       deviceType: 'Kindle',
       type: 'Highlight',
-      id: 'kdjfkdjkdjf',
+      id: 'a5a2b761',
       author: 'Rob Rohan',
       page: 1,
       title: 'Faster after 50 and things',
@@ -26,12 +26,12 @@ export const Import: React.FC = () => {
     [GN] load_file_as_json (entry.c:55) Reading file into json array...
     [GN] fn_getHighlights (entry.c:103) Back. Returning highlight data...
     [GN] main (entry.c:239) Finishing checker thread`,
-      date: '12345',
+      // date: '12345',
     },
     {
       deviceType: 'Kindle',
       type: 'Highlight',
-      id: 'kdjfkdjssssskdjf',
+      id: 'a5a2b762',
       author: 'Roab Rohan',
       page: 1,
       title: 'Another book with things in it',
@@ -43,18 +43,18 @@ export const Import: React.FC = () => {
       
       Also, in the open mode, try using binary, so try rb & wb rather than r & w
       `,
-      date: '12345',
+      // date: '12345',
     },
     {
       deviceType: 'Kindle',
       type: 'Highlight',
-      id: 'kdjfkdjdfddkdjf',
+      id: 'a5a2b763',
       author: 'wang luo',
       page: 1,
       title: 'Da Jia Hao',
       text: `这个故事强调了两个牧羊犬和主人之间的竞争，并记载了一个被困在他们之间的男孩大卫的成熟。他的母亲去世，他留给父亲亚当·玛丹（Adam M'Adam）照顾，他是一个讽刺，愤怒的酒鬼，几乎没有赎回的品质。玛丹（M'Adam）是红毛犬（Red Wull）的主人，红毛犬是一种猛烈的狗，会用蛮力将羊放牧。另一只狗是战斗之子鲍勃（Bob）。他用技巧和说服力放牧绵羊。
       他的主人是肯缪尔（Kenmuir）的主人詹姆斯·摩尔（James Moore），他是大卫的代父`,
-      date: '12345',
+      // date: '12345',
     },
   ]*/);
   const [devices, setDevices] = useState<DeviceList>();
@@ -78,6 +78,31 @@ export const Import: React.FC = () => {
           alert(err.message);
         });
     }
+  };
+
+  const importHighlights = () => {
+    highlights.forEach(async (h) => _import(h));
+  };
+
+  const _import = async (h: Highlight) => {
+    // This is pretty hammer-esq...
+    // Try to create the new highlight
+    try {
+      await API.graphql(graphqlOperation(createHighlight, { input: h }));
+    } catch (e) {
+      console.warn(e);
+      // if it fails, try to update...
+      try {
+        await API.graphql(graphqlOperation(updateHighlight, { input: h }));
+      } catch (err) {
+        // if that fails, the meh
+        console.error(err);
+      }
+    }
+  };
+
+  const importHighlight = async (idx: number) => {
+    _import(highlights[idx]);
   };
 
   useEffect(() => {
@@ -109,7 +134,7 @@ export const Import: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="ml-4 mt-4 flex-shrink-0 flex">
+                <div className="ml-4 mt-4 flex-shrink-0 flex gap-1">
                   {devices?.kindle === 1 && (
                     <button
                       id="kindle"
@@ -118,7 +143,7 @@ export const Import: React.FC = () => {
                       disabled={false}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                      Check Kindle
+                      Kindle
                     </button>
                   )}
                   {devices?.kobo === 1 && (
@@ -129,17 +154,18 @@ export const Import: React.FC = () => {
                       disabled={false}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                      Check Kobo
+                      Kobo
                     </button>
                   )}
-
-                  {/* <button
-                  type="button"
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <PhoneIcon className="-ml-1 mr-2 h-5 w-5 text-gray-400" aria-hidden="true" />
-                  <span>Phone</span>
-                </button> */}
+                  {highlights && (
+                    <button
+                      id="kobo"
+                      onClick={() => importHighlights()}
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      Import All
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -154,14 +180,26 @@ export const Import: React.FC = () => {
                     >
                       <div className="w-full flex items-center justify-between p-6 space-x-6">
                         <div className="flex-1">
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-3 truncate">
                             <h3 className="text-gray-900 text-sm font-medium truncate overflow-ellipsis">
                               {highlight.title}
                             </h3>
                           </div>
-                          <p className="mt-1 text-gray-500 text-sm overflow-ellipsis overflow-hidden">
+                          <p className="mt-1 text-gray-500 text-sm overflow-ellipsis overflow-hidden whitespace-pre-line">
                             {highlight.text}
                           </p>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="-mt-px flex divide-x divide-gray-200">
+                          <div className="w-0 flex-1 flex">
+                            <button
+                              onClick={() => importHighlight(i)}
+                              className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
+                            >
+                              <span className="ml-3">Import</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </li>

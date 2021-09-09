@@ -12,7 +12,7 @@ export type Highlight = {
   text: string;
   annotation?: string;
   annotationExtra?: string;
-  date: string;
+  date?: string;
 };
 export type HighlightList = Array<Highlight>;
 

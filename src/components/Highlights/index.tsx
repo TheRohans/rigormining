@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { API, graphqlOperation } from 'aws-amplify';
-import { createHighlight, updateHighlight, deleteHighlight } from '../../graphql/mutations';
+import { deleteHighlight } from '../../graphql/mutations';
 import { listHighlights } from '../../graphql/queries';
-import { DeviceType, HighlightType } from '../../API';
-import { Highlight, HighlightList, DeviceList } from './types';
+import { HighlightList } from './types';
 import Navigation from '@components/App/Navigation';
 
 declare const window: any;
@@ -12,20 +11,17 @@ export const Highlights: React.FC = () => {
   const [highlights, setHighlights] = useState<HighlightList>();
 
   const getHighlights = async () => {
-    // const highlightDetails = {
-    //   id: '12345',
-    //   type: HighlightType.Highlight,
-    //   deviceType: DeviceType.Pdf,
-    //   title: 'My Crazy PDF',
-    //   author: 'Rob Rohan',
-    //   text: "This is some text that doesn't really exist",
-    //   page: 3,
-    // };
-
-    // const newHighlight = await API.graphql({ query: createHighlight, variables: { input: highlightDetails } });
-
     const r = await API.graphql(graphqlOperation(listHighlights));
     setHighlights((r as any)?.data?.listHighlights?.items);
+  };
+
+  const removeHighlight = async (id: string) => {
+    try {
+      await API.graphql(graphqlOperation(deleteHighlight, { input: { id } }));
+      setHighlights(highlights.filter((h) => h.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -47,15 +43,7 @@ export const Highlights: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="ml-4 mt-4 flex-shrink-0 flex">
-                  {/* <button
-                  type="button"
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <PhoneIcon className="-ml-1 mr-2 h-5 w-5 text-gray-400" aria-hidden="true" />
-                  <span>Phone</span>
-                </button> */}
-                </div>
+                <div className="ml-4 mt-4 flex-shrink-0 flex"></div>
               </div>
             </div>
 
@@ -73,6 +61,18 @@ export const Highlights: React.FC = () => {
                             <h3 className="text-gray-900 text-sm font-medium truncate">{highlight.title}</h3>
                           </div>
                           <p className="mt-1 text-gray-500 text-sm whitespace-pre-line">{highlight.text}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="-mt-px flex divide-x divide-gray-200">
+                          <div className="w-0 flex-1 flex">
+                            <button
+                              onClick={() => removeHighlight(highlight.id)}
+                              className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
+                            >
+                              <span className="ml-3">Delete</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </li>
