@@ -91,12 +91,14 @@ export const Import: React.FC = () => {
       await API.graphql(graphqlOperation(createHighlight, { input: h }));
     } catch (e) {
       console.warn(e);
+      // alert(JSON.stringify(e));
       // if it fails, try to update...
       try {
         await API.graphql(graphqlOperation(updateHighlight, { input: h }));
       } catch (err) {
         // if that fails, the meh
         console.error(err);
+        // alert(JSON.stringify(err));
       }
     }
   };

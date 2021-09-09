@@ -31,14 +31,16 @@ enum DeviceType {
 type Highlight @model @auth(rules: [{ allow: owner }]) {
   # LTc4NjYwMDA5NQ==
   id: ID!
-  type: HighlightType
-  deviceType: DeviceType
-  title: String
+  type: HighlightType!
+  deviceType: DeviceType!
+  title: String!
   isbn: String
   author: String
   page: Int
   startOffset: Int
+  endOffset: Int
   text: String
   annotation: String
   annotationExtra: String
+  date: String
 }
