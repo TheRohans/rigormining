@@ -67,6 +67,7 @@ module.exports = {
   devServer: {
     port: 8080,
     watchContentBase: true,
+    historyApiFallback: true,
   },
   externals: {
     // react: 'react',

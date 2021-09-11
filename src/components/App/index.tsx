@@ -17,8 +17,6 @@ export const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const logIn = (email: string, password: string): Promise<any> => {
-    console.log('submitting');
-
     return Auth.signIn({
       username: email,
       password,
@@ -61,9 +59,9 @@ export const App: React.FC = () => {
 
         <Route exact path="/signup" component={SignUp} />
 
-        <ProtectedRoute exact loggedIn={loggedIn} path="/library" component={Library} />
-        <ProtectedRoute exact loggedIn={loggedIn} path="/highlights" component={Highlights} />
-        <ProtectedRoute exact loggedIn={loggedIn} path="/import" component={Import} />
+        <ProtectedRoute exact path="/library" component={Library} />
+        <ProtectedRoute exact path="/highlights" component={Highlights} />
+        <ProtectedRoute exact path="/import" component={Import} />
       </Switch>
     </BrowserRouter>
   );

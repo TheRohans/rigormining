@@ -2,12 +2,14 @@ import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 
 export const ProtectedRoute = (props: any) => {
+  const loggedIn = !!localStorage.getItem('isAuthenticated');
+
   return (
     <Route
       path={props.path}
       render={(data) =>
-        props.loggedIn ? (
-          <props.component {...data}></props.component>
+        loggedIn ? (
+          <props.component {...props} loggedIn={loggedIn} {...data}></props.component>
         ) : (
           <Redirect to={{ pathname: '/signin' }}></Redirect>
         )

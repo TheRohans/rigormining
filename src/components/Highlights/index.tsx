@@ -55,23 +55,38 @@ export const Highlights: React.FC = () => {
                       key={`${highlight.id}${highlight.type}`}
                       className="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200"
                     >
-                      <div className="w-full flex items-center justify-between p-6 space-x-6">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <h3 className="text-gray-900 text-sm font-medium truncate">{highlight.title}</h3>
+                      <div className="w-full h-full flex items-center justify-between p-6 space-x-6">
+                        <div className="w-full h-full flex justify-between flex-col">
+                          <div className="flex items-center space-x-3 truncate">
+                            <h3 className="text-gray-900 text-sm font-medium truncate overflow-ellipsis">
+                              {highlight.title}
+                            </h3>
                           </div>
-                          <p className="mt-1 text-gray-500 text-sm whitespace-pre-line">{highlight.text}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="-mt-px flex divide-x divide-gray-200">
-                          <div className="w-0 flex-1 flex">
-                            <button
-                              onClick={() => removeHighlight(highlight.id)}
-                              className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
-                            >
-                              <span className="ml-3">Delete</span>
-                            </button>
+
+                          <p className="mt-1 text-gray-500 text-sm flex-grow">{highlight.text}</p>
+
+                          <div className="w-full flex divide-x divide-gray-200 justify-evenly mt-4">
+                            <span className="relative z-0 inline-flex shadow-sm rounded-md">
+                              <button
+                                type="button"
+                                onClick={() => removeHighlight(highlight.id)}
+                                className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-red-300 text-sm font-medium text-white  hover:bg-red-500 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                Delete
+                              </button>
+                              <button
+                                type="button"
+                                className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                Reference
+                              </button>
+                              <button
+                                type="button"
+                                className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                Share
+                              </button>
+                            </span>
                           </div>
                         </div>
                       </div>
