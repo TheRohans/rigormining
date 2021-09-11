@@ -22,6 +22,7 @@ export const App: React.FC = () => {
       password,
     }).then((user) => {
       setLoggedIn(true);
+      localStorage.setItem('isAuthenticated', 'true');
       return user;
     });
   };
@@ -29,6 +30,7 @@ export const App: React.FC = () => {
   const logOut = (): Promise<void> => {
     return Auth.signOut().then(() => {
       setLoggedIn(false);
+      localStorage.removeItem('isAuthenticated');
       return;
     });
   };
