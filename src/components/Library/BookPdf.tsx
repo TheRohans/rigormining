@@ -18,7 +18,7 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
   const task = PDFJS.getDocument(url);
 
   const previousPage = () => {
-    setPage(page - 1);
+    setPage(page > 1 ? page - 1 : 1);
     renderPage(currentPdf, page);
   };
 
@@ -34,10 +34,17 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
   };
 
   const renderPage = (pdf: PDFDocumentProxy, pageNum: number) => {
-    pdf.getPage(pageNum).then((page) => {
-      console.log('Page loaded');
+    ////////////
+    const savedPages = localStorage.getItem('ks_pages');
+    const spObj = JSON.parse(savedPages) ?? {};
+    (spObj as any)[new URL(url).pathname] = pageNum;
+    localStorage.setItem('ks_pages', JSON.stringify(spObj));
+    ////////////
 
-      const scale = 1.15;
+    pdf.getPage(pageNum).then((page) => {
+      // console.log('Page loaded');
+
+      const scale = 1.1;
       const viewport = page.getViewport({ scale: scale });
 
       // Prepare canvas using PDF page dimensions
@@ -54,16 +61,16 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
       const renderTask = page.render(renderContext);
 
       page.getTextContent().then((textContent) => {
-        console.log(textContent);
+        // console.log(textContent);
 
         // Assign CSS to the textLayer element
         const textLayer = document.querySelector('.textLayer') as HTMLDivElement;
-        textLayer.style.left = canvas.offsetLeft + 'px';
-        textLayer.style.top = canvas.offsetTop + 'px';
+        textLayer.style.left = `${canvas.offsetLeft}px`;
+        textLayer.style.top = `${canvas.offsetTop}px`;
         // textLayer.style.height = canvas.offsetHeight + 'px';
         // textLayer.style.width = canvas.offsetWidth + 'px';
-        textLayer.style.height = canvas.height + 'px';
-        textLayer.style.width = canvas.width + 'px';
+        textLayer.style.height = `${canvas.height}px`;
+        textLayer.style.width = `${canvas.width}px`;
         textLayer.style.position = 'absolute';
 
         textLayer.innerHTML = '';
@@ -87,17 +94,24 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
       });
 
       renderTask.promise.then(function () {
-        console.log('Page rendered');
+        // console.log('Page rendered');
       });
     });
   };
 
   useEffect(() => {
+    ////////////
+    const savedPages = localStorage.getItem('ks_pages');
+    const spObj = JSON.parse(savedPages) ?? {};
+    const pg = (spObj as any)[new URL(url).pathname] ?? 1;
+    ////////////
+
     task.promise
       .then((pdf) => {
-        console.log('pdf loaded');
+        // console.log('pdf loaded');
         setCurrentPdf(pdf);
-        renderPage(pdf, 1);
+        setPage(pg);
+        renderPage(pdf, pg);
         setLoading(false);
       })
       .catch((err) => {
@@ -113,9 +127,23 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
 
   return (
     <>
-      <header>
-        <div className="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold leading-tight text-gray-900">
+      <main>
+        <div style={{ overflow: 'hidden' }} className="flex justify-center py-2 sm:px-0 max-h-full relative">
+          {loading && <Loader />}
+          {!loading && (
+            <>
+              <canvas id="pdfarea" className={`rounded-lg ${styles.bookDisplay} max-h-full`} ref={refDisplay}></canvas>
+              <div className="textLayer"></div>
+            </>
+          )}
+        </div>
+
+        <div className="leftSide h-full w-14 fixed left-0 top-0" onClick={() => previousPage()}></div>
+        <div className="rightSide h-full w-14 fixed right-0 top-0" onClick={() => nextPage()}></div>
+
+        <div className="fixed top-0 left-0 w-full">
+          {/*  max-w-7xl mx-auto */}
+          <div className="flex justify-end">
             <button
               type="button"
               className="inline-flex items-center mx-2 px-2 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -131,7 +159,7 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
               <CloudDownloadIcon className="h-4 w-4" aria-hidden="true" />
             </button> */}
 
-            <span className="relative z-0 inline-flex shadow-sm rounded-md">
+            {/* <span className="relative z-0 inline-flex shadow-sm rounded-md">
               <button
                 type="button"
                 className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
@@ -148,19 +176,8 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
                 <span className="sr-only">Next</span>
                 <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
               </button>
-            </span>
-          </h1>
-        </div>
-      </header>
-      <main>
-        <div style={{ position: 'relative' }} className="flex justify-center px-2 py-2 sm:px-0">
-          {loading && <Loader />}
-          {!loading && (
-            <>
-              <canvas id="pdfarea" className={`rounded-lg ${styles.bookDisplay}`} ref={refDisplay}></canvas>
-              <div className="textLayer"></div>
-            </>
-          )}
+            </span> */}
+          </div>
         </div>
       </main>
     </>

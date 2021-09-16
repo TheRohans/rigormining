@@ -83,7 +83,12 @@ export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadB
                     .filter((i) => i.type !== undefined)
                     .map((book) => (
                       <tr key={book.name}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{book.name}</td>
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                          onClick={() => visitBook(book.name, book.type)}
+                        >
+                          {book.name}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">{typeBadge(book.type)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button

@@ -57,6 +57,8 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
   };
 
   useEffect(() => {
+    const savedPages = localStorage.getItem('ks_pages');
+
     refDisplay.current.textContent = '';
     const book = ePub(url, {
       openAs: type,
@@ -71,13 +73,13 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
     const displayed = rendLocal.display(currentSectionIndex);
 
     displayed.then((renderer) => {
-      console.log('display done', renderer);
+      // console.log('display done', renderer);
       setRendition(rendLocal);
     });
 
     // Navigation loaded
     book.loaded.navigation.then((toc) => {
-      console.log('toc', toc);
+      // console.log('toc', toc);
     });
 
     book.ready.then(() => {
@@ -98,9 +100,19 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
 
   return (
     <div>
-      <header>
-        <div className="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold leading-tight text-gray-900">
+      <main>
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <div className="px-2 py-2 sm:px-0">
+            {loading && <Loader />}
+            <div id="bookarea" className={`rounded-lg ${styles.bookDisplay}`} ref={refDisplay}></div>
+          </div>
+        </div>
+
+        <div className="leftSide h-full w-14 fixed left-0 top-0" onClick={() => previousPage()}></div>
+        <div className="rightSide h-full w-14 fixed right-0 top-0" onClick={() => nextPage()}></div>
+
+        <div className="fixed top-0 left-0 w-full">
+          <div className="flex justify-end">
             <button
               type="button"
               className="inline-flex items-center mx-2 px-2 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -115,8 +127,7 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
             >
               <CloudDownloadIcon className="h-4 w-4" aria-hidden="true" />
             </button> */}
-
-            <span className="relative z-0 inline-flex shadow-sm rounded-md">
+            {/* <span className="relative z-0 inline-flex shadow-sm rounded-md">
               <button
                 type="button"
                 className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
@@ -133,15 +144,7 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
                 <span className="sr-only">Next</span>
                 <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
               </button>
-            </span>
-          </h1>
-        </div>
-      </header>
-      <main>
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div className="px-2 py-2 sm:px-0">
-            {loading && <Loader />}
-            <div id="bookarea" className={`rounded-lg ${styles.bookDisplay}`} ref={refDisplay}></div>
+            </span> */}
           </div>
         </div>
       </main>

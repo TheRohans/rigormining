@@ -9,7 +9,7 @@ copy_worker:
 	cp ./node_modules/pdfjs-dist/build/pdf.worker.js ./pdf.worker.js
 
 build: clean
-	yarn build --env KNOTSET_VERSION=$(hash)
+	KNOTSET_VERSION=$(hash) yarn build --env KNOTSET_VERSION=$(hash)
 	cp pdf.worker.js dist/pdf.worker.js
 
 start:
