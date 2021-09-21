@@ -18,6 +18,7 @@ export const getHighlight = /* GraphQL */ `
       annotation
       annotationExtra
       date
+      uri
       createdAt
       updatedAt
       owner
@@ -45,6 +46,42 @@ export const listHighlights = /* GraphQL */ `
         annotation
         annotationExtra
         date
+        uri
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+export const getDocument = /* GraphQL */ `
+  query GetDocument($id: ID!) {
+    getDocument(id: $id) {
+      id
+      library
+      name
+      fileName
+      type
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const listDocuments = /* GraphQL */ `
+  query ListDocuments(
+    $filter: ModelDocumentFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listDocuments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        library
+        name
+        fileName
+        type
         createdAt
         updatedAt
         owner

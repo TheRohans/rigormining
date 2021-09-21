@@ -1,9 +1,11 @@
 // TODO: should get these from graphql?
 
+export type DeviceType = 'Kindle' | 'Kobo' | 'Pdf' | 'Epub' | 'Web';
+
 export type Highlight = {
   id: string;
   type: 'Highlight' | 'Annotation';
-  deviceType: 'Kindle' | 'Kobo';
+  deviceType: DeviceType;
   title: string;
   isbn?: string;
   author: string;
@@ -13,10 +15,19 @@ export type Highlight = {
   annotation?: string;
   annotationExtra?: string;
   date?: string;
+  uri?: string;
 };
 export type HighlightList = Array<Highlight>;
 
 export type DeviceList = {
   kindle?: number;
   kobo?: number;
+};
+
+export type Document = {
+  id: string;
+  library: string;
+  name: string;
+  fileName: string;
+  type: DeviceType;
 };

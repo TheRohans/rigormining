@@ -26,10 +26,17 @@ enum DeviceType {
   Kobo
   Pdf
   Epub
+  Web
 }
 
 type Highlight @model @auth(rules: [{ allow: owner }]) {
-  # LTc4NjYwMDA5NQ==
+  # @key(
+  #   name: "byDueDate"
+  #   fields: ["homeworkStudentId", "dueDate"]
+  #   queryField: "homeworkByDueDate"
+  # )
+  # -----------\ userid -------------------\ text hash
+  # 613e5539-1ab7-4624-9b2e-b91d2e8816a8:LTc4NjYwMDA5NQ==
   id: ID!
   type: HighlightType!
   deviceType: DeviceType!
@@ -43,4 +50,15 @@ type Highlight @model @auth(rules: [{ allow: owner }]) {
   annotation: String
   annotationExtra: String
   date: String
+  uri: String
+}
+
+type Document @model @auth(rules: [{ allow: owner }]) {
+  # -----------\ userid -------------------\ fileName hash
+  # 613e5539-1ab7-4624-9b2e-b91d2e8816a8:LTc4NjYwMDA5NQ==
+  id: ID!
+  library: String!
+  name: String!
+  fileName: String!
+  type: DeviceType
 }

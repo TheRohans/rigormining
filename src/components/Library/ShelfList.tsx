@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Storage from '@aws-amplify/storage';
 
 import { CloudDownloadIcon, EyeIcon } from '@heroicons/react/solid';
+import { listDocuments } from '../../graphql/queries';
+import { graphqlOperation } from '@aws-amplify/api-graphql';
+import { Document, DeviceType } from '../Highlights/types';
+import API from '@aws-amplify/api';
 
 type ShelfListProps = {
   path: string;
-  visitBook: (name: string, type: string) => void;
+  visitBook: (name: string, type: DeviceType) => void;
   downloadBookByName: (name: string) => void;
 };
 
@@ -15,46 +19,56 @@ type LibraryItem = {
 };
 
 export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadBookByName }) => {
-  const [booklist, setBookList] = useState<LibraryItem[]>([]);
+  // const [booklist, setBookList] = useState<LibraryItem[]>([]);
+  const [documentList, setDocumentList] = useState<Document[]>([]);
+
+  const getDocuments = async () => {
+    const r = await API.graphql(graphqlOperation(listDocuments));
+    setDocumentList((r as any)?.data?.listDocuments?.items);
+  };
 
   useEffect(() => {
-    Storage.get(`${path}/metadata.json`, {
-      level: 'public',
-      download: true,
-      contentType: 'application/json',
-    })
-      .then((v) => (v as any)?.Body?.text())
-      .then((v) => {
-        const json = JSON.parse(v);
-        setBookList(json.children);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    getDocuments();
+    // Storage.get(`${path}/metadata.json`, {
+    //   level: 'public',
+    //   download: true,
+    //   contentType: 'application/json',
+    // })
+    //   .then((v) => (v as any)?.Body?.text())
+    //   .then((v) => {
+    //     const json = JSON.parse(v);
+    //     setBookList(json.children);
+    //   })
+    //   .catch((e) => {
+    //     console.log('no books');
+    //     console.error(e);
+    //   });
   }, []);
 
-  const typeBadge = (type: string): JSX.Element => {
+  const typeBadge = (type: DeviceType): JSX.Element => {
     switch (type) {
-      case 'pdf':
-      case 'png':
+      case 'Pdf':
         return (
           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
             {type}
           </span>
         );
-      case 'pub':
+      case 'Epub':
         return (
           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
             epub
           </span>
         );
+      default:
+        return <span></span>;
     }
     return <span></span>;
   };
 
   return (
     <>
-      {booklist.length > 0 && (
+      {documentList.length === 0 && <h1>No Documents</h1>}
+      {documentList.length > 0 && (
         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -79,7 +93,7 @@ export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadB
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {booklist
+                  {documentList
                     .filter((i) => i.type !== undefined)
                     .map((book) => (
                       <tr key={book.name}>

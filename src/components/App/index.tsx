@@ -13,6 +13,11 @@ import Import from '@components/Highlights/import';
 
 import Navigation from './Navigation';
 
+export const useUser = async () => {
+  const user = await Auth.currentAuthenticatedUser();
+  return user;
+};
+
 export const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 

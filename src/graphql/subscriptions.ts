@@ -18,6 +18,7 @@ export const onCreateHighlight = /* GraphQL */ `
       annotation
       annotationExtra
       date
+      uri
       createdAt
       updatedAt
       owner
@@ -40,6 +41,7 @@ export const onUpdateHighlight = /* GraphQL */ `
       annotation
       annotationExtra
       date
+      uri
       createdAt
       updatedAt
       owner
@@ -62,6 +64,49 @@ export const onDeleteHighlight = /* GraphQL */ `
       annotation
       annotationExtra
       date
+      uri
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onCreateDocument = /* GraphQL */ `
+  subscription OnCreateDocument($owner: String!) {
+    onCreateDocument(owner: $owner) {
+      id
+      library
+      name
+      fileName
+      type
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onUpdateDocument = /* GraphQL */ `
+  subscription OnUpdateDocument($owner: String!) {
+    onUpdateDocument(owner: $owner) {
+      id
+      library
+      name
+      fileName
+      type
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onDeleteDocument = /* GraphQL */ `
+  subscription OnDeleteDocument($owner: String!) {
+    onDeleteDocument(owner: $owner) {
+      id
+      library
+      name
+      fileName
+      type
       createdAt
       updatedAt
       owner

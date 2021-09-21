@@ -16,6 +16,7 @@ export type CreateHighlightInput = {
   annotation?: string | null,
   annotationExtra?: string | null,
   date?: string | null,
+  uri?: string | null,
 };
 
 export enum HighlightType {
@@ -45,6 +46,7 @@ export type ModelHighlightConditionInput = {
   annotation?: ModelStringInput | null,
   annotationExtra?: ModelStringInput | null,
   date?: ModelStringInput | null,
+  uri?: ModelStringInput | null,
   and?: Array< ModelHighlightConditionInput | null > | null,
   or?: Array< ModelHighlightConditionInput | null > | null,
   not?: ModelHighlightConditionInput | null,
@@ -126,9 +128,40 @@ export type UpdateHighlightInput = {
   annotation?: string | null,
   annotationExtra?: string | null,
   date?: string | null,
+  uri?: string | null,
 };
 
 export type DeleteHighlightInput = {
+  id?: string | null,
+};
+
+export type CreateDocumentInput = {
+  id?: string | null,
+  library: string,
+  name: string,
+  fileName: string,
+  type?: DeviceType | null,
+};
+
+export type ModelDocumentConditionInput = {
+  library?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  fileName?: ModelStringInput | null,
+  type?: ModelDeviceTypeInput | null,
+  and?: Array< ModelDocumentConditionInput | null > | null,
+  or?: Array< ModelDocumentConditionInput | null > | null,
+  not?: ModelDocumentConditionInput | null,
+};
+
+export type UpdateDocumentInput = {
+  id: string,
+  library?: string | null,
+  name?: string | null,
+  fileName?: string | null,
+  type?: DeviceType | null,
+};
+
+export type DeleteDocumentInput = {
   id?: string | null,
 };
 
@@ -146,6 +179,7 @@ export type ModelHighlightFilterInput = {
   annotation?: ModelStringInput | null,
   annotationExtra?: ModelStringInput | null,
   date?: ModelStringInput | null,
+  uri?: ModelStringInput | null,
   and?: Array< ModelHighlightFilterInput | null > | null,
   or?: Array< ModelHighlightFilterInput | null > | null,
   not?: ModelHighlightFilterInput | null,
@@ -165,6 +199,17 @@ export type ModelIDInput = {
   attributeExists?: boolean | null,
   attributeType?: ModelAttributeTypes | null,
   size?: ModelSizeInput | null,
+};
+
+export type ModelDocumentFilterInput = {
+  id?: ModelIDInput | null,
+  library?: ModelStringInput | null,
+  name?: ModelStringInput | null,
+  fileName?: ModelStringInput | null,
+  type?: ModelDeviceTypeInput | null,
+  and?: Array< ModelDocumentFilterInput | null > | null,
+  or?: Array< ModelDocumentFilterInput | null > | null,
+  not?: ModelDocumentFilterInput | null,
 };
 
 export type CreateHighlightMutationVariables = {
@@ -188,6 +233,7 @@ export type CreateHighlightMutation = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
@@ -215,6 +261,7 @@ export type UpdateHighlightMutation = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
@@ -242,6 +289,64 @@ export type DeleteHighlightMutation = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type CreateDocumentMutationVariables = {
+  input: CreateDocumentInput,
+  condition?: ModelDocumentConditionInput | null,
+};
+
+export type CreateDocumentMutation = {
+  createDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type UpdateDocumentMutationVariables = {
+  input: UpdateDocumentInput,
+  condition?: ModelDocumentConditionInput | null,
+};
+
+export type UpdateDocumentMutation = {
+  updateDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type DeleteDocumentMutationVariables = {
+  input: DeleteDocumentInput,
+  condition?: ModelDocumentConditionInput | null,
+};
+
+export type DeleteDocumentMutation = {
+  deleteDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
@@ -268,6 +373,7 @@ export type GetHighlightQuery = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
@@ -298,6 +404,49 @@ export type ListHighlightsQuery = {
       annotation: string | null,
       annotationExtra: string | null,
       date: string | null,
+      uri: string | null,
+      createdAt: string,
+      updatedAt: string,
+      owner: string | null,
+    } | null > | null,
+    nextToken: string | null,
+  } | null,
+};
+
+export type GetDocumentQueryVariables = {
+  id: string,
+};
+
+export type GetDocumentQuery = {
+  getDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type ListDocumentsQueryVariables = {
+  filter?: ModelDocumentFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListDocumentsQuery = {
+  listDocuments:  {
+    __typename: "ModelDocumentConnection",
+    items:  Array< {
+      __typename: "Document",
+      id: string,
+      library: string,
+      name: string,
+      fileName: string,
+      type: DeviceType | null,
       createdAt: string,
       updatedAt: string,
       owner: string | null,
@@ -326,6 +475,7 @@ export type OnCreateHighlightSubscription = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
@@ -352,6 +502,7 @@ export type OnUpdateHighlightSubscription = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
@@ -378,6 +529,61 @@ export type OnDeleteHighlightSubscription = {
     annotation: string | null,
     annotationExtra: string | null,
     date: string | null,
+    uri: string | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type OnCreateDocumentSubscriptionVariables = {
+  owner: string,
+};
+
+export type OnCreateDocumentSubscription = {
+  onCreateDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type OnUpdateDocumentSubscriptionVariables = {
+  owner: string,
+};
+
+export type OnUpdateDocumentSubscription = {
+  onUpdateDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
+    createdAt: string,
+    updatedAt: string,
+    owner: string | null,
+  } | null,
+};
+
+export type OnDeleteDocumentSubscriptionVariables = {
+  owner: string,
+};
+
+export type OnDeleteDocumentSubscription = {
+  onDeleteDocument:  {
+    __typename: "Document",
+    id: string,
+    library: string,
+    name: string,
+    fileName: string,
+    type: DeviceType | null,
     createdAt: string,
     updatedAt: string,
     owner: string | null,
