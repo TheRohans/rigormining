@@ -77,19 +77,20 @@ export const Library: React.FC = () => {
       const encoder = new TextEncoder();
       const data = encoder.encode(name);
       const hash = await crypto.subtle.digest('SHA-256', data);
-      const _v = await Storage.put(`${path}/${name}`, file, {
+      Storage.put(`${path}/${name}`, file, {
         level: 'public',
+      }).then((_v) => {
+        console.log('done', _v);
+        const d: Document = {
+          id: `${user.username}:${btoa(String.fromCharCode.apply(null, new Uint8Array(hash)))}`,
+          library: `${path}`,
+          name: `${name}`,
+          fileName: `${name}`,
+          type: name.toLowerCase().endsWith('pdf') ? 'Pdf' : 'Epub',
+        };
+        console.log(d);
+        API.graphql(graphqlOperation(createDocument, { input: d }));
       });
-      console.log('done', _v);
-      const d: Document = {
-        id: `${user.username}:${btoa(String.fromCharCode.apply(null, new Uint8Array(hash)))}`,
-        library: `${path}`,
-        name: `${name}`,
-        fileName: `${name}`,
-        type: name.toLowerCase().endsWith('pdf') ? 'Pdf' : 'Epub',
-      };
-      console.log(d);
-      await API.graphql(graphqlOperation(createDocument, { input: d }));
     } catch (e) {
       console.error(e);
     }
