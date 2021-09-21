@@ -77,6 +77,7 @@ export const Library: React.FC = () => {
       const encoder = new TextEncoder();
       const data = encoder.encode(name);
       const hash = await crypto.subtle.digest('SHA-256', data);
+      // Warning: this can't be await or it fails :-/
       Storage.put(`${path}/${name}`, file, {
         level: 'public',
       }).then((_v) => {
@@ -88,8 +89,8 @@ export const Library: React.FC = () => {
           fileName: `${name}`,
           type: name.toLowerCase().endsWith('pdf') ? 'Pdf' : 'Epub',
         };
-        console.log(d);
         API.graphql(graphqlOperation(createDocument, { input: d }));
+        console.log('done done', d);
       });
     } catch (e) {
       console.error(e);
