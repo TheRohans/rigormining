@@ -5,58 +5,12 @@ import { createHighlight, updateHighlight } from '../../graphql/mutations';
 // import { DeviceType, HighlightType } from '../../API';
 import { Highlight, HighlightList, DeviceList } from './types';
 import Navigation from '@components/App/Navigation';
+import { useUser } from '@components/App';
 
 declare const window: any;
 
 export const Import: React.FC = () => {
-  const [highlights, setHighlights] =
-    useState<HighlightList>(/*[
-    {
-      deviceType: 'Kindle',
-      type: 'Highlight',
-      id: 'a5a2b761',
-      author: 'Rob Rohan',
-      page: 1,
-      title: 'Faster after 50 and things',
-      text: `[GN] main (entry.c:232) Starting checker thread
-    [GN] check_for_device (entry.c:152) Current working dir: /home/rob/Projects/knotset-desk/KnotSet
-    [GN] fn_getHighlights (entry.c:91) Going to check a kindle.
-    [GN] fn_getHighlights (entry.c:101) File not loaded, going to try to get the highlights from the device
-    [GN] load_file_as_json (entry.c:52) Trying to read into file: kindle.json. Got a read size of 77077 and allocation size 77077
-    [GN] load_file_as_json (entry.c:55) Reading file into json array...
-    [GN] fn_getHighlights (entry.c:103) Back. Returning highlight data...
-    [GN] main (entry.c:239) Finishing checker thread`,
-      // date: '12345',
-    },
-    {
-      deviceType: 'Kindle',
-      type: 'Highlight',
-      id: 'a5a2b762',
-      author: 'Roab Rohan',
-      page: 1,
-      title: 'Another book with things in it',
-      text: ` If you do not wish to use the wide options, experiment with the following:
-      
-      Read and write bytes, not characters. Also known as, use binary, not text.
-      
-      fgetc effectively gets a byte from a file, but if the byte is greater than 127, try treating it as a int instead of a char. fputc, on the other hand, silently ignores putting a char > 127. It will work if you use an int rather than char as the input.
-      
-      Also, in the open mode, try using binary, so try rb & wb rather than r & w
-      `,
-      // date: '12345',
-    },
-    {
-      deviceType: 'Kindle',
-      type: 'Highlight',
-      id: 'a5a2b763',
-      author: 'wang luo',
-      page: 1,
-      title: 'Da Jia Hao',
-      text: `这个故事强调了两个牧羊犬和主人之间的竞争，并记载了一个被困在他们之间的男孩大卫的成熟。他的母亲去世，他留给父亲亚当·玛丹（Adam M'Adam）照顾，他是一个讽刺，愤怒的酒鬼，几乎没有赎回的品质。玛丹（M'Adam）是红毛犬（Red Wull）的主人，红毛犬是一种猛烈的狗，会用蛮力将羊放牧。另一只狗是战斗之子鲍勃（Bob）。他用技巧和说服力放牧绵羊。
-      他的主人是肯缪尔（Kenmuir）的主人詹姆斯·摩尔（James Moore），他是大卫的代父`,
-      // date: '12345',
-    },
-  ]*/);
+  const [highlights, setHighlights] = useState<HighlightList>();
   const [devices, setDevices] = useState<DeviceList>();
 
   const kindleBtnRef = useRef<HTMLButtonElement>();
@@ -85,16 +39,20 @@ export const Import: React.FC = () => {
   };
 
   const _import = async (h: Highlight) => {
+    const user = await useUser();
+    // Change the ID to include our username
+    const uploadHighlight = Object.assign({ id: `${user.username}:${h.id}` }, h);
+
     // This is pretty hammer-esq...
     // Try to create the new highlight
     try {
-      await API.graphql(graphqlOperation(createHighlight, { input: h }));
+      await API.graphql(graphqlOperation(createHighlight, { input: uploadHighlight }));
     } catch (e) {
       console.warn(e);
       // alert(JSON.stringify(e));
       // if it fails, try to update...
       try {
-        await API.graphql(graphqlOperation(updateHighlight, { input: h }));
+        await API.graphql(graphqlOperation(updateHighlight, { input: uploadHighlight }));
       } catch (err) {
         // if that fails, the meh
         console.error(err);
