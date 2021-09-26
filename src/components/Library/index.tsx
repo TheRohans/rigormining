@@ -162,7 +162,11 @@ export const Library: React.FC = () => {
         <>
           <Navigation loggedIn={true} />
 
-          <div ref={dropArea} id="drop-area" className="border-2 border-gray-300 border-dashed p-2 m-3">
+          <div
+            ref={dropArea}
+            id="drop-area"
+            className="border-2 border-gray-300 border-dashed p-2 m-3 max-w-7xl mx-auto sm:px-6 lg:px-8"
+          >
             <form className="my-form">
               <p>
                 Upload multiple documents with the file dialog, or by dragging and dropping documents onto the dashed

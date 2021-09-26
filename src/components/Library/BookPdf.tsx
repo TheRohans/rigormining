@@ -18,13 +18,23 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
   const task = PDFJS.getDocument(url);
 
   const previousPage = () => {
-    setPage(page > 1 ? page - 1 : 1);
-    renderPage(currentPdf, page);
+    try {
+      setPage(page > 1 ? page - 1 : 1);
+      renderPage(currentPdf, page);
+    } catch (e) {
+      // Page probably too far
+      console.warn('Previous page: ', e);
+    }
   };
 
   const nextPage = () => {
-    setPage(page + 1);
-    renderPage(currentPdf, page);
+    try {
+      setPage(page + 1);
+      renderPage(currentPdf, page);
+    } catch (e) {
+      // Page probably too far
+      console.warn('Next page: ', e);
+    }
   };
 
   const keyListener = (e: KeyboardEvent) => {
@@ -138,8 +148,14 @@ export const BookPdf: React.FC<BookProps> = ({ type, url, loc, closeBook, downlo
           )}
         </div>
 
-        <div className="leftSide h-full w-14 fixed left-0 top-0" onClick={() => previousPage()}></div>
-        <div className="rightSide h-full w-14 fixed right-0 top-0" onClick={() => nextPage()}></div>
+        <div
+          className="leftSide h-full w-2/12 fixed left-0 top-0 bg-gray-300 bg-opacity-0 cursor-pointer"
+          onClick={() => previousPage()}
+        ></div>
+        <div
+          className="rightSide h-full w-2/12 fixed right-0 top-0 bg-gray-300 bg-opacity-0 cursor-pointer"
+          onClick={() => nextPage()}
+        ></div>
 
         <div className="fixed top-0 left-0 w-full">
           {/*  max-w-7xl mx-auto */}

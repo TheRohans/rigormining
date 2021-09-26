@@ -108,8 +108,14 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
           </div>
         </div>
 
-        <div className="leftSide h-full w-14 fixed left-0 top-0" onClick={() => previousPage()}></div>
-        <div className="rightSide h-full w-14 fixed right-0 top-0" onClick={() => nextPage()}></div>
+        <div
+          className="leftSide h-full w-2/12 fixed left-0 top-0 bg-gray-300 bg-opacity-0 cursor-pointer"
+          onClick={() => previousPage()}
+        ></div>
+        <div
+          className="rightSide h-full w-2/12 fixed right-0 top-0 bg-gray-300 bg-opacity-0 cursor-pointer"
+          onClick={() => nextPage()}
+        ></div>
 
         <div className="fixed top-0 left-0 w-full">
           <div className="flex justify-end">

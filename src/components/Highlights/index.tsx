@@ -70,11 +70,19 @@ export const Highlights: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => removeHighlight(highlight.id)}
-                                className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-red-300 text-sm font-medium text-white  hover:bg-red-500 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-red-300 text-sm font-medium text-gray-300 hover:bg-red-500 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                               >
                                 Delete
                               </button>
-                              <button
+
+                              {/* <button
+                                type="button"
+                                onClick={() => removeHighlight(highlight.id)}
+                                className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-red-300 text-sm font-medium text-white  hover:bg-red-500 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                Delete
+                              </button> */}
+                              {/* <button
                                 type="button"
                                 className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                               >
@@ -85,7 +93,7 @@ export const Highlights: React.FC = () => {
                                 className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                               >
                                 Share
-                              </button>
+                              </button> */}
                             </span>
                           </div>
                         </div>
