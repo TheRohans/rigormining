@@ -6,6 +6,7 @@ import { createHighlight, updateHighlight } from '../../graphql/mutations';
 import { Highlight, HighlightList, DeviceList } from './types';
 import Navigation from '@components/App/Navigation';
 import { useUser } from '@components/App';
+import log from '../App/log';
 
 declare const window: any;
 
@@ -41,23 +42,21 @@ export const Import: React.FC = () => {
   const _import = async (h: Highlight) => {
     const user = await useUser();
     // Change the ID to include our username
-    // const uploadHighlight = Object.assign({}, h, { id: `${user.username}:${h.id}` });
     h.id = `${user.username}:${h.id}`;
 
     // This is pretty hammer-esq...
     // Try to create the new highlight
     try {
+      log('highlight:', h);
       await API.graphql(graphqlOperation(createHighlight, { input: h }));
     } catch (e) {
-      console.warn(e);
-      alert(`create: ${e.message}`);
+      log('create error', e);
       // if it fails, try to update...
       try {
         await API.graphql(graphqlOperation(updateHighlight, { input: h }));
       } catch (err) {
         // if that fails, the meh
-        console.error(err);
-        alert(`update: ${err.message}`);
+        log('update error', err);
       }
     }
   };
@@ -67,6 +66,7 @@ export const Import: React.FC = () => {
   };
 
   useEffect(() => {
+    log('Starting up importer...');
     if (window.ks_deviceCheck) {
       const interval = setInterval(
         () => {
