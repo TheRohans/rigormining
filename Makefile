@@ -2,18 +2,27 @@ PHONY: clean build
 
 hash = $(shell git log --pretty=format:'%h' -n 1)
 
+KNOTSET_identityPoolId=us-west-2:4800e468-c8b7-4a0b-a772-6add33659941
+KNOTSET_VERSION=development
+
 clean:
 	rm -rf dist
+
+make_env:
+	@echo "" > .env
+	@echo "KNOTSET_identityPoolId=$(KNOTSET_identityPoolId)" >> .env
+	@echo "KNOTSET_VERSION=$(hash)" >> .env
+	@echo "" >> .env
 
 copy_worker:
 	cp ./node_modules/pdfjs-dist/build/pdf.worker.js ./pdf.worker.js
 
-build: clean
-	KNOTSET_VERSION=$(hash) yarn build --env KNOTSET_VERSION=$(hash)
+build: clean make_env copy_worker
+	yarn build
 	cp pdf.worker.js dist/pdf.worker.js
 
-start:
-	yarn start --env KNOTSET_VERSION=$(hash)
+start: make_env
+	yarn start
 
 publish: build
 	aws s3 sync --delete --region us-west-2 \
