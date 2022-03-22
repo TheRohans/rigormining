@@ -30,6 +30,9 @@ export const SignIn: React.FC<SignInProps> = ({ logIn }) => {
       })
       .catch((e) => {
         console.error(e);
+        if (e.name === 'QuotaExceededError') {
+          window.localStorage.clear();
+        }
         setError(e.message);
         setWorking(false);
       });
