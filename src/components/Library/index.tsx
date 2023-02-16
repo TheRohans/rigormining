@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { SetS3Config } from '../../services';
-import Storage from '@aws-amplify/storage';
+// import Storage from '@aws-amplify/storage';
 import { ShelfList } from './ShelfList';
 import Book, { BookFormats } from './Book';
 import Navigation from '@components/App/Navigation';
-import { createDocument } from '../../graphql/mutations';
+// import { createDocument } from '../../graphql/mutations';
 import { useUser } from '@components/App';
 import { DeviceType, Document } from '../Highlights/types';
-import { API, graphqlOperation } from 'aws-amplify';
+// import { API, graphqlOperation } from 'aws-amplify';
 
 export const Library: React.FC = () => {
   const [currentBook, setCurrentBook] = useState<string>('');
@@ -19,30 +19,30 @@ export const Library: React.FC = () => {
   const path = 'library/default';
 
   const viewBook = (name: string, contentType: string) => {
-    Storage.get(`${path}/${name}`, {
-      level: 'public',
-      download: false,
-      contentType,
-    })
-      .then((v) => {
-        console.log(v);
-        setCurrentBook(v as string);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    // Storage.get(`${path}/${name}`, {
+    //   level: 'public',
+    //   download: false,
+    //   contentType,
+    // })
+    //   .then((v) => {
+    //     console.log(v);
+    //     setCurrentBook(v as string);
+    //   })
+    //   .catch((e) => {
+    //     console.error(e);
+    //   });
   };
 
   const fetchBook = (name: string) => {
-    Storage.get(`${path}/${name}`, {
-      level: 'public',
-    })
-      .then((v) => {
-        downloadBook(v as string);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    // Storage.get(`${path}/${name}`, {
+    //   level: 'public',
+    // })
+    //   .then((v) => {
+    //     downloadBook(v as string);
+    //   })
+    //   .catch((e) => {
+    //     console.error(e);
+    //   });
   };
 
   const visitBook = (name: string, type: DeviceType) => {
@@ -78,20 +78,20 @@ export const Library: React.FC = () => {
       const data = encoder.encode(name);
       const hash = await crypto.subtle.digest('SHA-256', data);
       // Warning: this can't be await or it fails :-/
-      Storage.put(`${path}/${name}`, file, {
-        level: 'public',
-      }).then((_v) => {
-        console.log('done', _v);
-        const d: Document = {
-          id: `${user.username}:${btoa(String.fromCharCode.apply(null, new Uint8Array(hash)))}`,
-          library: `${path}`,
-          name: `${name}`,
-          fileName: `${name}`,
-          type: name.toLowerCase().endsWith('pdf') ? 'Pdf' : 'Epub',
-        };
-        API.graphql(graphqlOperation(createDocument, { input: d }));
-        console.log('done done', d);
-      });
+      // Storage.put(`${path}/${name}`, file, {
+      //   level: 'public',
+      // }).then((_v) => {
+      //   console.log('done', _v);
+      //   const d: Document = {
+      //     id: `${user.username}:${btoa(String.fromCharCode.apply(null, new Uint8Array(hash)))}`,
+      //     library: `${path}`,
+      //     name: `${name}`,
+      //     fileName: `${name}`,
+      //     type: name.toLowerCase().endsWith('pdf') ? 'Pdf' : 'Epub',
+      //   };
+      //   API.graphql(graphqlOperation(createDocument, { input: d }));
+      //   console.log('done done', d);
+      // });
     } catch (e) {
       console.error(e);
     }

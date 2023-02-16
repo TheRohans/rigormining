@@ -5,6 +5,10 @@ hash = $(shell git log --pretty=format:'%h' -n 1)
 KNOTSET_identityPoolId=us-west-2:4800e468-c8b7-4a0b-a772-6add33659941
 KNOTSET_VERSION=development
 
+
+install:
+	yarn install
+
 clean:
 	rm -rf dist
 
@@ -18,11 +22,11 @@ copy_worker:
 	cp ./node_modules/pdfjs-dist/build/pdf.worker.js ./pdf.worker.js
 
 build: clean make_env copy_worker
-	yarn build
+	NODE_OPTIONS=--openssl-legacy-provider yarn build
 	cp pdf.worker.js dist/pdf.worker.js
 
 start: make_env
-	yarn start
+	NODE_OPTIONS=--openssl-legacy-provider yarn start
 
 publish: build
 	aws s3 sync --delete --region us-west-2 \

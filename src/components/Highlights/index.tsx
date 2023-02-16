@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
-import { deleteHighlight } from '../../graphql/mutations';
-import { listHighlights } from '../../graphql/queries';
+// import { API, graphqlOperation } from 'aws-amplify';
+// import { deleteHighlight } from '../../graphql/mutations';
+// import { listHighlights } from '../../graphql/queries';
 import { HighlightList } from './types';
 import Navigation from '@components/App/Navigation';
 
@@ -11,13 +11,14 @@ export const Highlights: React.FC = () => {
   const [highlights, setHighlights] = useState<HighlightList>();
 
   const getHighlights = async () => {
-    const r = await API.graphql(graphqlOperation(listHighlights));
+    // const r = await API.graphql(graphqlOperation(listHighlights));
+    const r = {};
     setHighlights((r as any)?.data?.listHighlights?.items);
   };
 
   const removeHighlight = async (id: string) => {
     try {
-      await API.graphql(graphqlOperation(deleteHighlight, { input: { id } }));
+      // await API.graphql(graphqlOperation(deleteHighlight, { input: { id } }));
       setHighlights(highlights.filter((h) => h.id !== id));
     } catch (err) {
       console.error(err);

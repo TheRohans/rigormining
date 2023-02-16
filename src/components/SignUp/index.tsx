@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Auth } from 'aws-amplify';
+// import { Auth } from 'aws-amplify';
 // import FormElement from './FormElement';
 
 const SignUp = () => {
@@ -9,35 +9,35 @@ const SignUp = () => {
   const [code, setCode] = useState('');
   const signUp = (e: any) => {
     e.preventDefault();
-    Auth.signUp({ username: email, password, attributes: { email } })
-      .then((data) => {
-        console.log(data);
-        setWaitingForCode(true);
-        setPassword('');
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // Auth.signUp({ username: email, password, attributes: { email } })
+    //   .then((data) => {
+    //     console.log(data);
+    //     setWaitingForCode(true);
+    //     setPassword('');
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
   const confirmSignUp = (e: any) => {
     e.preventDefault();
-    Auth.confirmSignUp(email, code)
-      .then((data) => {
-        console.log(data);
-        setWaitingForCode(false);
-        setEmail('');
-        setCode('');
-      })
-      .catch((err) => console.log(err));
+    // Auth.confirmSignUp(email, code)
+    //   .then((data) => {
+    //     console.log(data);
+    //     setWaitingForCode(false);
+    //     setEmail('');
+    //     setCode('');
+    //   })
+    //   .catch((err) => console.log(err));
   };
   const resendCode = () => {
-    Auth.resendSignUp(email)
-      .then(() => {
-        console.log('code resent successfully');
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    // Auth.resendSignUp(email)
+    //   .then(() => {
+    //     console.log('code resent successfully');
+    //   })
+    //   .catch((e) => {
+    //     console.log(e);
+    //   });
   };
   return (
     <div className="form">

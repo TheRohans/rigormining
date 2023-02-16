@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Storage from '@aws-amplify/storage';
+// import Storage from '@aws-amplify/storage';
 
 import { CloudDownloadIcon, EyeIcon } from '@heroicons/react/solid';
-import { listDocuments } from '../../graphql/queries';
-import { graphqlOperation } from '@aws-amplify/api-graphql';
+// import { listDocuments } from '../../graphql/queries';
+// import { graphqlOperation } from '@aws-amplify/api-graphql';
 import { Document, DeviceType } from '../Highlights/types';
-import API from '@aws-amplify/api';
+// import API from '@aws-amplify/api';
 
 type ShelfListProps = {
   path: string;
@@ -23,7 +23,8 @@ export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadB
   const [documentList, setDocumentList] = useState<Document[]>([]);
 
   const getDocuments = async () => {
-    const r = await API.graphql(graphqlOperation(listDocuments));
+    // const r = await API.graphql(graphqlOperation(listDocuments));
+    const r = {};
     setDocumentList((r as any)?.data?.listDocuments?.items);
   };
 

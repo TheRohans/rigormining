@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
-import { createHighlight, updateHighlight } from '../../graphql/mutations';
+// import { API, graphqlOperation } from 'aws-amplify';
+// import { createHighlight, updateHighlight } from '../../graphql/mutations';
 // import { listHighlights } from '../../graphql/queries';
 // import { DeviceType, HighlightType } from '../../API';
 import { Highlight, HighlightList, DeviceList } from './types';
@@ -48,12 +48,12 @@ export const Import: React.FC = () => {
     // Try to create the new highlight
     try {
       log('highlight:', h);
-      await API.graphql(graphqlOperation(createHighlight, { input: h }));
+      // await API.graphql(graphqlOperation(createHighlight, { input: h }));
     } catch (e) {
       log('create error', e);
       // if it fails, try to update...
       try {
-        await API.graphql(graphqlOperation(updateHighlight, { input: h }));
+        // await API.graphql(graphqlOperation(updateHighlight, { input: h }));
       } catch (err) {
         // if that fails, the meh
         log('update error', err);

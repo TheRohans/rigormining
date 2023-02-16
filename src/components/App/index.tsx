@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import { Auth } from 'aws-amplify';
+// import { Auth } from 'aws-amplify';
 import { ProtectedRoute } from '../../routes/ProtectedRoute';
 
 import Home from '@components/Home';
@@ -14,7 +14,9 @@ import Import from '@components/Highlights/import';
 import Navigation from './Navigation';
 
 export const useUser = async () => {
-  const user = await Auth.currentAuthenticatedUser();
+  const user = {
+    username: "rob"
+  }; // await Auth.currentAuthenticatedUser();
   return user;
 };
 
@@ -22,22 +24,32 @@ export const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const logIn = (email: string, password: string): Promise<any> => {
-    return Auth.signIn({
-      username: email,
-      password,
-    }).then((user) => {
-      setLoggedIn(true);
+    return new Promise((res,rej) => {
       localStorage.setItem('isAuthenticated', 'true');
-      return user;
-    });
+      return "rob";
+    })
+    // return Auth.signIn({
+    //   username: email,
+    //   password,
+    // }).then((user) => {
+    //   setLoggedIn(true);
+    //   localStorage.setItem('isAuthenticated', 'true');
+    //   return user;
+    // });
   };
 
   const logOut = (): Promise<void> => {
-    return Auth.signOut().then(() => {
+    return new Promise((res, rej)=>{
       setLoggedIn(false);
       localStorage.removeItem('isAuthenticated');
       return;
-    });
+    })
+
+    // return Auth.signOut().then(() => {
+    //   setLoggedIn(false);
+    //   localStorage.removeItem('isAuthenticated');
+    //   return;
+    // });
   };
 
   return (
