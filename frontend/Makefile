@@ -12,8 +12,15 @@ clean:
 	rm -rf dist
 	rm -rf coverage
 
-make_env:
+make_dev_env:
 	@echo "" > .env
+	@echo "KNOTSET_BUCKET=http://localhost:8000" >> .env
+	@echo "KNOTSET_VERSION=$(hash)" >> .env
+	@echo "" >> .env
+
+make_prod_env:
+	@echo "" > .env
+	@echo "KNOTSET_BUCKET=https://private.knotset.com" >> .env
 	@echo "KNOTSET_VERSION=$(hash)" >> .env
 	@echo "" >> .env
 
@@ -21,12 +28,12 @@ copy_worker:
 	cp ./node_modules/pdfjs-dist/build/pdf.worker.js ./pdf.worker.js
 
 # Build for distro
-build: clean make_env copy_worker
+build: clean make_prod_env copy_worker
 	NODE_OPTIONS=--openssl-legacy-provider yarn build
 	cp pdf.worker.js dist/pdf.worker.js
 
 # Build for dev
-start: make_env
+start: make_dev_env
 	NODE_OPTIONS=--openssl-legacy-provider yarn start
 
 test:

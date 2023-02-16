@@ -2,7 +2,7 @@ PHONY: build public clean publish serve
 
 PYTHON=python3
 
-serve: build_index
+start: build_index
 	cd public; $(PYTHON) -m http.server
 
 build_index:

@@ -12,7 +12,7 @@ export const Library: React.FC = () => {
 
   const dropArea = useRef<HTMLDivElement>();
 
-  StorageConfig('private.knotset.com', 'public');
+  StorageConfig(process.env.KNOTSET_BUCKET, 'public');
   const path = 'library/default';
 
   const viewBook = (name: string, contentType: string) => {
