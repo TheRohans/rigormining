@@ -2,6 +2,7 @@ node_modules
 test-coverage
 .env
 dist
+coverage
 *.epub
 *.pdf
 data/public/**/*.png
