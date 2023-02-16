@@ -1,13 +1,13 @@
+*~
+.DS_Store
+.vscode
 node_modules
 test-coverage
 .env
 dist
+build
 coverage
 # *.epub
 # *.pdf
-data/public/**/*.png
 pdf.worker.js
 
-build/
-dist/
-node_modules/
