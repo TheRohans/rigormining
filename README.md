@@ -2,6 +2,8 @@
 
 Your dumping ground for research
 
+Possible [long term vision](https://miro.com/app/board/uXjVOzAdL8A=/)
+
 ## Getting Started
 
 As I am sure you'd guess, the backend and the frontend need to run at the same time. I just use different tabs in me shell.
@@ -30,6 +32,6 @@ It takes a minute, but if all goes well, you should be able to view the site by 
 
 You can login with anything for credentials.
 
-I've removed most of the original backend for this - it was using AWS amplify, graphql, and dynmodb for login and storage, but those amplify version of those things suck. So any reference you see to graphql doesn't work, but I left it in to see how it was working.
+I've removed most of the original backend for this - it was using AWS amplify, graphql, and dynmodb for login and storage, but the amplify version of those things suck. So any reference to graphql don't work, but are there for reference.
 
-The thing that still work right now, is the PDF and epub document loading and viewing - you can see highlighting callback in the console.
+The only thing that still works right now, is the PDF and epub document viewing - you can see highlighting callback in the console.
