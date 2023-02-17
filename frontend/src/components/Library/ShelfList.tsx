@@ -1,69 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { CloudDownloadIcon, EyeIcon } from '@heroicons/react/solid';
-// import { listDocuments } from '../../graphql/queries';
-import { Document, DeviceType } from '../Highlights/types';
+import { Document, DocumentDisplayType } from '../Highlights/types';
 
 type ShelfListProps = {
   path: string;
-  visitBook: (name: string, type: DeviceType) => void;
+  visitBook: (name: string, type: DocumentDisplayType) => void;
   downloadBookByName: (name: string) => void;
 };
-
-// type LibraryItem = {
-//   name: string;
-//   type: string;
-// };
 
 export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadBookByName }) => {
   const [documentList, setDocumentList] = useState<Document[]>([]);
 
   const getDocuments = async () => {
-    // const r = await API.graphql(graphqlOperation(listDocuments));
-    const r = {
-      data: {
-        listDocuments: {
-          items: [] as Document[]
-        }
-      }
-    };
-    setDocumentList((r as any)?.data?.listDocuments?.items);
+    // TODO: hard coded URL
+    const dataFetch = await fetch(
+      "http://localhost:8000/public/library/rohan/metadata.json"
+    ).then((res) => res.json())
+    setDocumentList(dataFetch.children);
   };
 
   useEffect(() => {
     getDocuments();
-    // Storage.get(`${path}/metadata.json`, {
-    //   level: 'public',
-    //   download: true,
-    //   contentType: 'application/json',
-    // })
-    //   .then((v) => (v as any)?.Body?.text())
-    //   .then((v) => {
-    //     const json = JSON.parse(v);
-    //     // setBookList(json.children);
-    //     setDocumentList...
-    //   })
-    //   .catch((e) => {
-    //     console.log('no books');
-    //     console.error(e);
-    //   });
   }, []);
 
-  const typeBadge = (type: DeviceType): JSX.Element => {
+  const typeBadge = (type: DocumentDisplayType): JSX.Element => {
     switch (type) {
-      case 'Pdf':
+      case 'pdf':
         return (
           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
             {type}
           </span>
         );
-      case 'Epub':
+      case 'pub':
         return (
           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
             epub
           </span>
         );
       default:
-        return <span></span>;
+        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+        ???
+      </span>;
     }
   };
 

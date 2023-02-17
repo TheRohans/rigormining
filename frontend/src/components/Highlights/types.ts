@@ -24,10 +24,12 @@ export type DeviceList = {
   kobo?: number;
 };
 
+export type DocumentDisplayType = 'pdf' | 'pub' | 'png' | 'jpg'
+
 export type Document = {
   id: string;
   library: string;
   name: string;
   fileName: string;
-  type: DeviceType;
+  type: DocumentDisplayType;
 };

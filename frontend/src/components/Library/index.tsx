@@ -1,58 +1,48 @@
 import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
-import { StorageConfig } from '../../services';
 import { ShelfList } from './ShelfList';
 import Book, { BookFormats } from './Book';
 import Navigation from '@components/App/Navigation';
 import { useUser } from '@components/App';
-import { DeviceType, Document } from '../Highlights/types';
+import { DocumentDisplayType } from '../Highlights/types';
+import log from '@components/App/log';
 
 export const Library: React.FC = () => {
   const [currentBook, setCurrentBook] = useState<string>('');
   const [currentBookType, setCurrentBookType] = useState<BookFormats>(undefined);
 
   const dropArea = useRef<HTMLDivElement>();
-
-  StorageConfig(process.env.KNOTSET_BUCKET, 'public');
   const path = 'library/default';
 
   const viewBook = (name: string, contentType: string) => {
-    // Storage.get(`${path}/${name}`, {
-    //   level: 'public',
-    //   download: false,
-    //   contentType,
-    // })
-    //   .then((v) => {
-    //     console.log(v);
-    //     setCurrentBook(v as string);
-    //   })
-    //   .catch((e) => {
-    //     console.error(e);
-    //   });
+    log("View book: " + name);
+
+    // TODO: hard coded URL
+    setCurrentBook(
+      `http://localhost:8000/public/library/rohan/${encodeURIComponent(name)}`
+    );
   };
 
   const fetchBook = (name: string) => {
-    // Storage.get(`${path}/${name}`, {
-    //   level: 'public',
-    // })
-    //   .then((v) => {
-    //     downloadBook(v as string);
-    //   })
-    //   .catch((e) => {
-    //     console.error(e);
-    //   });
+    log("Fetch book: " + name);
+    // TODO: hard coded URL
+    downloadBook(`http://localhost:8000/public/library/rohan/${encodeURIComponent(name)}`);
   };
 
-  const visitBook = (name: string, type: DeviceType) => {
+  const visitBook = (name: string, type: DocumentDisplayType) => {
+    log(`Type: ${type}`); 
     switch (type) {
-      case 'Epub':
+      case 'pub':
+        log("View epub: " + name);
         setCurrentBookType('epub');
         viewBook(name, 'application/epub+zip');
         break;
-      case 'Pdf':
+      case 'pdf':
+        log("View pdf: " + name);
         setCurrentBookType('pdf');
         viewBook(name, 'application/pdf');
-        // fetchBook(name);
         break;
+      default:
+        alert("Yeah, nah. Try a pdf or epub");
     }
   };
 

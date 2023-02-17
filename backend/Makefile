@@ -1,9 +1,10 @@
 PHONY: build public clean publish serve
 
-PYTHON=python3
+install: 
+	yarn add http-server
 
 start: build_index
-	cd public; $(PYTHON) -m http.server
+	npx http-server -p 8000 --cors
 
 build_index:
 	rm ./public/public/library/rohan/metadata.json
