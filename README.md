@@ -31,3 +31,5 @@ It takes a minute, but if all goes well, you should be able to view the site by 
 You can login with anything for credentials.
 
 I've removed most of the original backend for this - it was using AWS amplify, graphql, and dynmodb for login and storage, but those amplify version of those things suck. So any reference you see to graphql doesn't work, but I left it in to see how it was working.
+
+The thing that still work right now, is the PDF and epub document loading and viewing - you can see highlighting callback in the console.
