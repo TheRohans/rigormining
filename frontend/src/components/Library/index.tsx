@@ -18,14 +18,14 @@ export const Library: React.FC = () => {
 
     // TODO: hard coded URL
     setCurrentBook(
-      `http://localhost:8000/public/library/rohan/${encodeURIComponent(name)}`
+      `http://localhost:3000/public/public/library/rohan/${encodeURIComponent(name)}`
     );
   };
 
   const fetchBook = (name: string) => {
     log("Fetch book: " + name);
     // TODO: hard coded URL
-    downloadBook(`http://localhost:8000/public/library/rohan/${encodeURIComponent(name)}`);
+    downloadBook(`http://localhost:3000/public/public/library/rohan/${encodeURIComponent(name)}`);
   };
 
   const visitBook = (name: string, type: DocumentDisplayType) => {

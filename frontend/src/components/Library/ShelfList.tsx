@@ -14,7 +14,7 @@ export const ShelfList: React.FC<ShelfListProps> = ({ path, visitBook, downloadB
   const getDocuments = async () => {
     // TODO: hard coded URL
     const dataFetch = await fetch(
-      "http://localhost:8000/public/library/rohan/metadata.json"
+      "http://localhost:3000/public/public/library/rohan/metadata.json"
     ).then((res) => res.json())
     setDocumentList(dataFetch.children);
   };
