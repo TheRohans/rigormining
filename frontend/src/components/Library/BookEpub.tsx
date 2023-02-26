@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { BookProps } from './Book';
-import ePub, { Rendition } from 'epubjs';
+import ePub, { Book, Rendition } from 'epubjs';
 import { ChevronLeftIcon, ChevronRightIcon, CloudDownloadIcon, XCircleIcon } from '@heroicons/react/solid';
 
 import styles from './bookepub.module.css';
@@ -25,6 +25,8 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
     const MOD = e.ctrlKey || e.metaKey;
     if ((e.keyCode || e.which) == 37) previousPage();
     if ((e.keyCode || e.which) == 39) nextPage();
+    if ((e.keyCode || e.which) == 88) closeBook();
+    console.log((e.keyCode || e.which));
   };
 
   // const addBookmark = function (cfi: any) {
@@ -45,15 +47,26 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
   //   this.trigger('reader:unbookmarked', bookmark);
   // };
 
-  const selectedRange = function (cfiRange: any) {
-    const cfiFragment = '#' + cfiRange;
-    console.log(cfiFragment);
-    // // Update the History Location
-    // if(this.settings.history && window.location.hash != cfiFragment) {
-    //   // Add CFI fragment to the history
-    //   history.pushState({}, '', cfiFragment);
-    //   this.currentLocationCfi = cfiRange;
-    // }
+  const selectedRange = function(book: Book) {
+    return function (cfiRange: any) {
+      const cfiFragment = '#' + cfiRange;
+      // console.log(cfiFragment);
+
+      // The API typescript seems to have the wrong types
+      ((book.getRange(cfiRange) as unknown) as Promise<Range>).then(r => {
+        console.log(r.toString());
+        book.loaded.metadata.then(m => {
+          console.log(m);
+        });
+      });
+
+      // // Update the History Location
+      // if(this.settings.history && window.location.hash != cfiFragment) {
+      //   // Add CFI fragment to the history
+      //   history.pushState({}, '', cfiFragment);
+      //   this.currentLocationCfi = cfiRange;
+      // }
+    }
   };
 
   useEffect(() => {
@@ -63,6 +76,7 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
     const book = ePub(url, {
       openAs: type,
     });
+
     const rendLocal = book.renderTo(refDisplay.current.id, {
       manager: 'continuous',
       flow: 'paginated',
@@ -84,7 +98,7 @@ export const BookEpub: React.FC<BookProps> = ({ type, url, loc, closeBook, downl
 
     book.ready.then(() => {
       rendLocal.on('keyup', keyListener);
-      rendLocal.on('selected', selectedRange);
+      rendLocal.on('selected', selectedRange(book));
 
       setLoading(false);
     });
