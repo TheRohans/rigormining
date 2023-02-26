@@ -1,10 +1,14 @@
 PHONY: build public clean publish serve
 
+include .env
+export
+
 install: 
-	yarn add http-server
+	go mod tidy
+	cp .env.template .env
 
 start: build_index
-	npx http-server -p 8000 --cors
+	go run cmd/server/main.go
 
 build_index:
 	rm ./public/public/library/rohan/metadata.json
@@ -12,8 +16,8 @@ build_index:
 		node toMeta.js . > metadata.json
 	cat ./public/public/library/rohan/metadata.json
 
-publish: build
-	aws s3 sync --delete --region us-west-2 \
-		--cache-control max-age=604800 \
-		--acl bucket-owner-full-control \
-		public s3://private.knotset.com/
+# publish: build
+# 	aws s3 sync --delete --region us-west-2 \
+# 		--cache-control max-age=604800 \
+# 		--acl bucket-owner-full-control \
+# 		public s3://private.knotset.com/

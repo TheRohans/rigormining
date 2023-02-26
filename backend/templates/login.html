@@ -1,0 +1,17 @@
+{{ template "header.html" . }}
+
+<section>
+  <form method="POST" action="/login">
+    <div class="field">
+      <label>Researcher</label>
+      <input type="text" name="alterego" required placeholder="Alter Ego" />
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="Password" />
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+</section>
+
+{{ template "footer.html" . }}
