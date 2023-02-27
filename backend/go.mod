@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/ardanlabs/conf v1.3.3
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/lestrrat-go/jwx v1.0.8
@@ -14,6 +15,7 @@ require (
 )
 
 require (
+	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/go-gorp/gorp/v3 v3.0.2 // indirect
 	github.com/lestrrat-go/backoff/v2 v2.0.3 // indirect
 	github.com/lestrrat-go/httpcc v0.0.0-20210101035852-e7e8fea419e3 // indirect

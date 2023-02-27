@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ardanlabs/conf"
+	ghandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -132,9 +133,12 @@ func Run() error {
 		router.HandleFunc("/login", auth.Login(env, repo)).Methods("POST")
 	}
 
+	headersOk := ghandlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With"})
+	originsOk := ghandlers.AllowedOrigins([]string{"*"})
+	methodsOk := ghandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      router,
+		Handler:      ghandlers.CORS(originsOk, headersOk, methodsOk)(router),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}
