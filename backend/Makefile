@@ -1,23 +1,30 @@
-PHONY: build public clean publish serve
+PHONY: install start build test extension
 
 include .env
 export
 
-install: 
+install: extension
 	go mod tidy
-	cp .env.template .env
+	cp -n .env.template .env || true
+	mkdir -p datastore/library
 
-start: build_index
+# Builds the browser extension zips (see extension/Makefile) and stages
+# them where RM_EXTENSION_DIR (default ./static/extension) expects to find
+# them - the "Get Extension" page serves straight out of here in local dev.
+extension:
+	cd ../extension && $(MAKE) build
+	mkdir -p static/extension
+	cp ../extension/dist/*.zip static/extension/
+
+start:
 	go run cmd/server/main.go
 
-build_index:
-	rm ./public/public/library/rohan/metadata.json
-	cd ./public/public/library/rohan; \
-		node toMeta.js . > metadata.json
-	cat ./public/public/library/rohan/metadata.json
+build:
+	go build -o rigormining-server cmd/server/main.go
 
-# publish: build
-# 	aws s3 sync --delete --region us-west-2 \
-# 		--cache-control max-age=604800 \
-# 		--acl bucket-owner-full-control \
-# 		public s3://private.knotset.com/
+test:
+	go test ./...
+
+# Building/pushing/deploying the container image needs both backend/ and
+# frontend/ in the build context - see the Makefile and Dockerfile at the
+# repo root (`cd .. && make docker_build`), not here.

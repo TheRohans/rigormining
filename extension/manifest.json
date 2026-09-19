@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Rigormining Capture",
+  "version": "0.2.1",
+  "description": "Capture papers and books from the web into your self-hosted Rigormining library.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "capture@rigormining.local"
+    }
+  }
+}

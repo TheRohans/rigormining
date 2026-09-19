@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/dist
+**/datastore
+**/coverage
+**/test-coverage
+**/*.db
+**/*.db-journal
+.DS_Store
+*~
+.vscode

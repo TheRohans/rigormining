@@ -12,12 +12,16 @@
       "dom"
     ],
     "allowJs": true,
+    "types": ["node", "jest"],
     "baseUrl": "./",
     "paths": {
       "@components/*": ["src/components/*"],
       "@routes/*": ["src/routes/"],
     },
   },
+  "include": [
+    "src/**/*",
+  ],
   "exclude": [
     "node_modules",
     "dist",

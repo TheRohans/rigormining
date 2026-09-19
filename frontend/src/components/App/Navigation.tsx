@@ -1,15 +1,15 @@
-import React from 'react';
-import { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import { Link } from 'react-router-dom';
 
-import unknown from '../../assets/img/unknown.jpg';
+import { api, logoutUrl, WhoAmI } from '../../api/client';
 
 const navigation = [
   { name: 'Library', to: '/library', current: true },
-  { name: 'Highlights', to: '/highlights', current: true },
-  { name: 'Import', to: '/import', current: true },
+  { name: 'Sync to Kobo', to: '/sync', current: true },
+  { name: 'Get Extension', to: '/extension', current: true },
+  { name: 'Settings', to: '/settings', current: true },
 ];
 
 const classNames = (...classes: any) => {
@@ -20,7 +20,23 @@ type NavProps = {
   loggedIn: boolean;
 };
 
+const initials = (user: WhoAmI | null): string => {
+  const source = user?.name || user?.email || '';
+  return source.trim().charAt(0).toUpperCase() || '?';
+};
+
 export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
+  const [user, setUser] = useState<WhoAmI | null>(null);
+
+  useEffect(() => {
+    if (loggedIn) {
+      api
+        .whoami()
+        .then(setUser)
+        .catch(() => setUser(null));
+    }
+  }, [loggedIn]);
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -40,17 +56,11 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
               </div>
               <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex-shrink-0 flex items-center">
-                  <Link to="/">
-                    <img
-                      className="block h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
-                      alt="Workflow"
-                    />
-                    {/* <img
-                      className="hidden lg:block h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg"
-                      alt="Workflow"
-                    /> */}
+                  <Link to="/" className="flex items-center gap-2 text-white font-semibold tracking-tight">
+                    <span className="h-7 w-7 rounded-md bg-indigo-500 flex items-center justify-center text-sm font-bold">
+                      R
+                    </span>
+                    <span className="hidden sm:inline">rigormining</span>
                   </Link>
                 </div>
                 <div className="hidden sm:block sm:ml-6">
@@ -85,7 +95,13 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
                         <div>
                           <Menu.Button className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                             <span className="sr-only">Open user menu</span>
-                            <img className="h-8 w-8 rounded-full" src={unknown} alt="Unknown profile picture" />
+                            {user?.picture ? (
+                              <img className="h-8 w-8 rounded-full" src={user.picture} alt="" />
+                            ) : (
+                              <span className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium">
+                                {initials(user)}
+                              </span>
+                            )}
                           </Menu.Button>
                         </div>
                         <Transition
@@ -130,15 +146,15 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
                           </Menu.Item> */}
                             <Menu.Item>
                               {({ active }) => (
-                                <Link
-                                  to="/signout"
+                                <a
+                                  href={logoutUrl}
                                   className={classNames(
                                     active ? 'bg-gray-100' : '',
                                     'block px-4 py-2 text-sm text-gray-700',
                                   )}
                                 >
                                   Sign out
-                                </Link>
+                                </a>
                               )}
                             </Menu.Item>
                           </Menu.Items>

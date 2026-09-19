@@ -8,7 +8,15 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 module.exports = {
   output: {
     path: path.join(__dirname, './dist'),
-    filename: 'knotset.[fullhash].js',
+    filename: 'rigormining.[fullhash].js',
+    // Without this, html-webpack-plugin emits a *relative* <script src>,
+    // which resolves against the current URL - fine at "/" or "/library",
+    // but breaks for any deeper client-side route like "/library/<id>"
+    // (the browser looks for the bundle one directory too deep and gets a
+    // blank page, since React never mounts). Absolute paths make every
+    // asset reference resolve from the site root regardless of which
+    // react-router path the SPA happened to be deep-linked to.
+    publicPath: '/',
   },
 
   entry: {

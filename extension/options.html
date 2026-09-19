@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Rigormining Capture - Settings</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 480px;
+        margin: 40px auto;
+      }
+      label {
+        display: block;
+        margin-top: 16px;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        margin-top: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        margin-top: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+      p.hint {
+        color: #666;
+        font-size: 12px;
+      }
+      #saved {
+        color: #16a34a;
+        font-size: 13px;
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Rigormining Capture settings</h2>
+    <p class="hint">
+      Create a personal API token from your Rigormining library's account settings page, then paste your server URL and
+      that token here.
+    </p>
+
+    <label for="serverUrl">Server URL</label>
+    <input id="serverUrl" type="url" placeholder="https://rigormining.example.com" />
+
+    <label for="apiToken">API token</label>
+    <input id="apiToken" type="password" placeholder="paste your token" />
+
+    <div>
+      <button id="save">Save</button>
+      <span id="saved"></span>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

@@ -6,19 +6,20 @@ export type BookFormats = 'epub' | 'pdf';
 export type BookProps = {
   type: BookFormats;
   url: string;
+  title?: string;
   loc?: number;
   closeBook: () => void;
   downloadBook: (url: string) => void;
 };
 
-export const Book: React.FC<BookProps> = ({ type, url, loc, closeBook, downloadBook }) => {
+export const Book: React.FC<BookProps> = ({ type, url, title, loc, closeBook, downloadBook }) => {
   return (
     <>
-      {(type as String) === 'pdf' && (
-        <BookPdf type={type} url={url} closeBook={closeBook} downloadBook={downloadBook} />
+      {(type as string) === 'pdf' && (
+        <BookPdf type={type} url={url} title={title} closeBook={closeBook} downloadBook={downloadBook} />
       )}
-      {(type as String) === 'epub' && (
-        <BookEpub type={type} url={url} closeBook={closeBook} downloadBook={downloadBook} />
+      {(type as string) === 'epub' && (
+        <BookEpub type={type} url={url} title={title} closeBook={closeBook} downloadBook={downloadBook} />
       )}
     </>
   );

@@ -1,21 +1,16 @@
 import React from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, RouteProps } from 'react-router-dom';
 
-export const ProtectedRoute = (props: any) => {
-  const loggedIn = !!localStorage.getItem('isAuthenticated');
-
-  return (
-    <Route
-      path={props.path}
-      render={(data) =>
-        loggedIn ? (
-          <props.component {...props} loggedIn={loggedIn} {...data}></props.component>
-        ) : (
-          <Redirect to={{ pathname: '/signin' }}></Redirect>
-        )
-      }
-    ></Route>
-  );
+type ProtectedRouteProps = RouteProps & {
+  component: React.ComponentType<any>;
+  loggedIn: boolean;
 };
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, loggedIn, ...rest }) => (
+  <Route
+    {...rest}
+    render={(routeProps) => (loggedIn ? <Component {...routeProps} /> : <Redirect to={{ pathname: '/signin' }} />)}
+  />
+);
 
 export default ProtectedRoute;
