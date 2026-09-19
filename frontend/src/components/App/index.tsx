@@ -1,89 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { ProtectedRoute } from '../../routes/ProtectedRoute';
 
 import Home from '@components/Home';
 import SignIn from '@components/SignIn';
-import SignUp from '@components/SignUp';
-import SignOut from '@components/SignOut';
 import Library from '@components/Library';
-import Highlights from '@components/Highlights';
-import Import from '@components/Highlights/import';
+import ItemDetail from '@components/Library/ItemDetail';
+import Sync from '@components/Sync';
+import Settings from '@components/Settings';
+import Extension from '@components/Extension';
 
 import Navigation from './Navigation';
-
-type Email = string;
-
-type User = {
-  email: Email,
-  username: string,
-}
-
-const currentAuthenticatedUser = async (): Promise<User> => {
-  return new Promise((res, rej) => {
-    res({
-      email: "blarg@yadda.com",
-      username: "rob"
-    });
-  });
-}
-
-export const useUser = async (): Promise<User> => {
-  const user = await currentAuthenticatedUser();
-  return user;
-};
+import { api, WhoAmI } from '../../api/client';
 
 export const App: React.FC = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [user, setUser] = useState<WhoAmI | null>(null);
+  const [checked, setChecked] = useState(false);
 
-  const logIn = (email: string, password: string): Promise<User> => {
-    return new Promise((res,rej) => {
-      setLoggedIn(true);
-      localStorage.setItem('isAuthenticated', 'true');
-      res({
-        email: email,
-        username: "rob"
-      });
-    })
-  };
+  useEffect(() => {
+    api
+      .whoami()
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setChecked(true));
+  }, []);
 
-  const logOut = (): Promise<void> => {
-    return new Promise((res, rej)=>{
-      setLoggedIn(false);
-      localStorage.removeItem('isAuthenticated');
-      res();
-    })
-  };
+  if (!checked) {
+    return null;
+  }
 
   return (
     <BrowserRouter>
       <Switch>
         <Route exact path="/">
-          <Navigation loggedIn={loggedIn} />
+          <Navigation loggedIn={!!user} />
           <Home />
         </Route>
 
         <Route exact path="/signin">
-          <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            {/* <Navigation loggedIn={loggedIn} /> */}
-            <div className="py-10">
-              <main>
-                <SignIn logIn={logIn} />
-              </main>
-            </div>
-          </div>
+          <SignIn />
         </Route>
 
-        <Route exact path="/signout">
-          {/* <Navigation loggedIn={loggedIn} /> */}
-          <SignOut logOut={logOut} />
-        </Route>
-
-        <Route exact path="/signup" component={SignUp} />
-
-        <ProtectedRoute exact path="/library" component={Library} />
-        <ProtectedRoute exact path="/highlights" component={Highlights} />
-        <ProtectedRoute exact path="/import" component={Import} />
+        <ProtectedRoute exact path="/library" component={Library} loggedIn={!!user} />
+        <ProtectedRoute exact path="/library/:id" component={ItemDetail} loggedIn={!!user} />
+        <ProtectedRoute exact path="/sync" component={Sync} loggedIn={!!user} />
+        <ProtectedRoute exact path="/settings" component={Settings} loggedIn={!!user} />
+        <ProtectedRoute exact path="/extension" component={Extension} loggedIn={!!user} />
       </Switch>
     </BrowserRouter>
   );

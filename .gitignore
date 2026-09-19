@@ -4,9 +4,13 @@
 node_modules
 test-coverage
 .env
+.env.production
+.env.production.yaml
 dist
 build
+datastore
 coverage
+backend/static
 # *.epub
 # *.pdf
 pdf.worker.js

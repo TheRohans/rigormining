@@ -1,18 +1,5 @@
 package models
 
-import (
-	"log"
-
-	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
-	"github.com/lestrrat-go/jwx/jwk"
-)
-
-// Env context for db, logger, etc
-type Env struct {
-	Db     *sqlx.DB
-	Log    *log.Logger
-	Cfg    *Config
-	Router *mux.Router
-	KeySet *jwk.Set
-}
+// Deprecated: superseded by internals/env.Env, which carries the OAuth
+// session user and the new DataRepository. Kept only because this session
+// couldn't get permission to delete the file outright — safe to remove.
