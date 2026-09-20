@@ -37,7 +37,11 @@ type Config struct {
 	DB struct {
 		Driver     string `conf:"default:sqlite3"`
 		Connection string `conf:"default:./datastore/rigormining.db"`
-		Post       string `conf:"default:PRAGMA synchronous = normal;PRAGMA journal_mode = WAL;PRAGMA temp_store = memory"`
+		// journal_mode is DELETE, not WAL - WAL needs mmap'd shared memory
+		// and byte-range locking that Cloud Storage FUSE doesn't support,
+		// so it fails against the mounted datastore/ volume in production
+		// (see the comment in backend/.env.template).
+		Post string `conf:"default:PRAGMA synchronous = normal;PRAGMA journal_mode = DELETE;PRAGMA temp_store = memory"`
 	}
 	// LibraryDir is where uploaded PDFs/EPUBs are stored, one subfolder per
 	// user. On GCP this lives on the same Cloud Run GCS-volume mount as the
