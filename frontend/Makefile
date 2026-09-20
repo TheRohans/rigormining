@@ -18,6 +18,7 @@ make_dev_env:
 	@echo "RIGORMINING_BUCKET=http://localhost:8000" >> .env
 	@echo "RIGORMINING_VERSION=$(hash)" >> .env
 	@echo "RIGORMINING_API_BASE=http://localhost:3000" >> .env
+	@echo "RIGORMINING_DEV_LOGIN=true" >> .env
 	@echo "" >> .env
 
 make_prod_env:

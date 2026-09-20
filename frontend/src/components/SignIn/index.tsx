@@ -1,6 +1,11 @@
 import React from 'react';
 import { loginUrl, devLoginUrl } from '../../api/client';
 
+// Only set in frontend/Makefile's make_dev_env, so this stays out of the
+// production bundle (make_prod_env doesn't set it) even though the server
+// already 404s /dev-login unless RM_AUTH_DEV_LOGIN=true is set too.
+const devLoginEnabled = process.env.RIGORMINING_DEV_LOGIN === 'true';
+
 export const SignIn: React.FC = () => {
   return (
     <div className="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 min-h-screen">
@@ -12,10 +17,11 @@ export const SignIn: React.FC = () => {
         >
           Sign in with Google
         </a>
-        {/* No-ops (404) unless the server has RM_AUTH_DEV_LOGIN=true set. */}
-        <a href={devLoginUrl} className="block text-xs text-gray-400 hover:text-gray-600">
-          Dev login (local only)
-        </a>
+        {devLoginEnabled && (
+          <a href={devLoginUrl} className="block text-xs text-gray-400 hover:text-gray-600">
+            Dev login (local only)
+          </a>
+        )}
       </div>
     </div>
   );
