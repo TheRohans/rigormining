@@ -143,6 +143,7 @@ func run() error {
 	api.HandleFunc("/tokens/{id}", handlers.APIDeleteToken(e)).Methods("DELETE")
 
 	api.HandleFunc("/extension/{browser}", handlers.APIDownloadExtension(e)).Methods("GET")
+	api.HandleFunc("/skills/{name}", handlers.APIDownloadSkill(e)).Methods("GET")
 
 	// The built React app is served last, as a catch-all, so it never
 	// shadows the routes above.

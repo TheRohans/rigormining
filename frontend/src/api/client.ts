@@ -140,6 +140,7 @@ export const api = {
   exportUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/export.md`,
   bibtexUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/export.bib`,
   extensionUrl: (browser: 'chrome' | 'firefox') => `${API_BASE}/api/v1/extension/${browser}`,
+  skillUrl: (name: string) => `${API_BASE}/api/v1/skills/${name}`,
 
   fetchFileBlob: async (id: string): Promise<Blob> => {
     const res = await fetch(`${API_BASE}/api/v1/items/${id}/file`, { credentials: 'include' });

@@ -55,4 +55,10 @@ type Config struct {
 	Extension struct {
 		Dir string `conf:"default:./static/extension"`
 	}
+	// Skills is where the built downloadable agent-skill zips live (see
+	// the root Makefile's skills target) - served from the same "Get
+	// Extension" page as a zip someone can drop into ~/.agents/skills.
+	Skills struct {
+		Dir string `conf:"default:./static/skills"`
+	}
 }

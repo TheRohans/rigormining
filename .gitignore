@@ -11,6 +11,8 @@ build
 datastore
 coverage
 backend/static
+__pycache__
+*.pyc
 # *.epub
 # *.pdf
 pdf.worker.js

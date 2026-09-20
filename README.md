@@ -61,6 +61,26 @@ then open its options page and set the server URL (your backend, e.g.
 Settings page in the app (`/settings`) - they're how the extension
 authenticates without doing a browser OAuth round-trip.
 
+### Kobo sync agent skill
+
+`.agents/skills/kobo-sync` is a skill for Claude Code and other AI coding
+agents that support the `.agents/skills` format. It talks to a running
+rigormining server's API to copy items queued with `request_sync` onto a
+locally mounted Kobo, delete items queued with `request_remove`, and ack
+each one back to the server - the same thing the app's own Sync-to-Kobo
+screen does, just from an agent instead of a browser (useful if you don't
+use Chrome/Edge, since that screen needs the File System Access API).
+
+It's plain Python standard library - **requires Python 3** to be
+installed, nothing else (check with `python3 --version`). No Node, Go, or
+extra pip packages needed.
+
+To install it: copy (or symlink) `.agents/skills/kobo-sync/` into
+`~/.agents/skills/kobo-sync/`, then ask your agent to sync your Kobo -
+it'll ask for your server URL and an API token (from the Settings page)
+the first time. It's also downloadable as a zip from the in-app "Get
+Extension" page if you don't want to clone the repo just for this.
+
 ### Importing a Zotero library
 
 `backend/cmd/import-zotero` is a one-off CLI tool that reads a local Zotero
