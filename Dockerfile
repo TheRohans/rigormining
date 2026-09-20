@@ -33,8 +33,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
 
 # --- runtime ---
 # Same base image as the builder (not a slim/alpine image) so the CGO
-# sqlite3 binding doesn't hit a glibc/musl mismatch at runtime - matches
-# ../laffaire's Dockerfile, which does the same thing for the same reason.
+# sqlite3 binding doesn't hit a glibc/musl mismatch at runtime.
 FROM golang:1.25
 WORKDIR /root/
 COPY --from=backend-builder /go/src/gitlab.com/robrohan/rigormining/rigormining-server ./
