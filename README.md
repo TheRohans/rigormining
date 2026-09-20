@@ -97,3 +97,7 @@ local disk. See the comment above the `docker_run` target in the root
 Kobo highlight/annotation sync (pulling highlights back off the device) is
 still just in the desktop application: https://github.com/robrohan/stitch.
 Future versions should add that code here.
+
+## License
+
+GPLv3, see [LICENSE](LICENSE).
