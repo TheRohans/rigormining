@@ -5,7 +5,12 @@ papers and books (PDF/EPUB), with tag-based projects, a built-in reader,
 one-click sync to a Kobo, and a browser extension for capturing papers directly
 into the application.
 
-## Layout
+## Getting Started
+
+The backend and frontend run as two separate processes in local dev - open
+two shells.
+
+### Layout
 
 - `backend/` - Go API server (`gorilla/mux`), SQLite (or Postgres) storage,
   Google OAuth login (or a no-OAuth dev login, see below).
@@ -13,11 +18,6 @@ into the application.
   detail/metadata editing, PDF/EPUB reader, and the Kobo sync screen.
 - `extension/` - a small Chrome/Firefox extension that captures the current
   tab (and its PDF, if it finds one) into your library via an API token.
-
-## Getting Started
-
-The backend and frontend run as two separate processes in local dev - open
-two shells.
 
 ### Backend
 
@@ -60,6 +60,39 @@ then open its options page and set the server URL (your backend, e.g.
 `http://localhost:3000`) and an API token. Tokens are created on the
 Settings page in the app (`/settings`) - they're how the extension
 authenticates without doing a browser OAuth round-trip.
+
+### Importing a Zotero library
+
+`backend/cmd/import-zotero` is a one-off CLI tool that reads a local Zotero
+data directory directly (`zotero.sqlite` + `storage/`) and imports every
+non-trashed item into a running rigormining server over its normal API -
+the same `POST /api/v1/items` and tag endpoints the browser extension uses.
+It never touches your real `zotero.sqlite` (it works off a throwaway copy,
+so it's safe to run while Zotero is open), and file-hash dedup means it's
+safe to re-run.
+
+From `backend/`, with the server already running (see above) and an API
+token from the app's Settings page (`/settings`):
+
+```
+go run ./cmd/import-zotero \
+  --zotero-dir=/path/to/Zotero \
+  --token=<your API token> \
+  --server=http://localhost:3000
+```
+
+`--zotero-dir` is the folder containing `zotero.sqlite` and `storage/`
+(commonly `~/Zotero` on macOS/Linux, or wherever your Zotero data
+directory was set to). Add `--limit=N` to import just the first N items as
+a dry run before doing the whole library.
+
+For each item it carries over title, authors, DOI/ISBN, URL, abstract
+(as notes), venue/volume/issue/pages/publisher, and year, attaches the
+best local file it can find (PDF over EPUB over anything else - items
+with no resolvable local file still import as metadata-only, same as
+bookmarking an item in the app), and merges Zotero tags and collection
+names into this app's flat tag list. It prints a summary of created vs.
+already-existing vs. no-file vs. failed items when it's done.
 
 ## Deploying
 
