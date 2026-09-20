@@ -134,8 +134,9 @@ func run() error {
 	api.HandleFunc("/items/{id}/export.bib", handlers.APIExportBibtex(e)).Methods("GET")
 	api.HandleFunc("/items/{id}/tags", handlers.APIAddItemTag(e)).Methods("POST")
 	api.HandleFunc("/items/{id}/tags/{tagId}", handlers.APIRemoveItemTag(e)).Methods("DELETE")
-	api.HandleFunc("/items/{id}/delivered", handlers.APIMarkDelivered(e)).Methods("POST")
-	api.HandleFunc("/items/{id}/delivered", handlers.APIClearDelivered(e)).Methods("DELETE")
+	api.HandleFunc("/items/{id}/sync", handlers.APIRequestSync(e)).Methods("POST")
+	api.HandleFunc("/items/{id}/sync", handlers.APICancelSync(e)).Methods("DELETE")
+	api.HandleFunc("/items/{id}/sync/ack", handlers.APIAckSync(e)).Methods("POST")
 
 	api.HandleFunc("/tokens", handlers.APIListTokens(e)).Methods("GET")
 	api.HandleFunc("/tokens", handlers.APICreateToken(e)).Methods("POST")

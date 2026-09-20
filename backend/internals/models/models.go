@@ -39,22 +39,31 @@ type Token struct {
 	CreatedAt string `db:"created_at" json:"created_at"`
 }
 
+// SyncState values for LibraryItem.SyncState. nil/"" means the item isn't
+// on the sync list at all. See the transition rules on
+// handlers.APIRequestSync/APICancelSync.
+const (
+	SyncStateRequestSync   = "request_sync"
+	SyncStateSynced        = "synced"
+	SyncStateRequestRemove = "request_remove"
+)
+
 // LibraryItem is a single paper/book in a user's library.
 type LibraryItem struct {
-	UUID        string  `db:"uuid"         json:"id"`
-	UserId      string  `db:"user_uuid"    json:"-"`
-	Title       string  `db:"title"        json:"title"`
-	Authors     string  `db:"authors"      json:"authors"`
-	Doi         *string `db:"doi"          json:"doi,omitempty"`
-	Isbn        *string `db:"isbn"         json:"isbn,omitempty"`
-	Year        *int    `db:"year"         json:"year,omitempty"`
-	SourceUrl   *string `db:"source_url"   json:"source_url,omitempty"`
-	FilePath    *string `db:"file_path"    json:"-"`
-	FileType    *string `db:"file_type"    json:"file_type,omitempty"`
-	FileHash    *string `db:"file_hash"    json:"-"`
-	AddedDate   string  `db:"added_date"   json:"added_date"`
-	DeliveredAt *string `db:"delivered_at" json:"delivered_at,omitempty"`
-	Notes       *string `db:"notes"        json:"notes,omitempty"`
+	UUID      string  `db:"uuid"         json:"id"`
+	UserId    string  `db:"user_uuid"    json:"-"`
+	Title     string  `db:"title"        json:"title"`
+	Authors   string  `db:"authors"      json:"authors"`
+	Doi       *string `db:"doi"          json:"doi,omitempty"`
+	Isbn      *string `db:"isbn"         json:"isbn,omitempty"`
+	Year      *int    `db:"year"         json:"year,omitempty"`
+	SourceUrl *string `db:"source_url"   json:"source_url,omitempty"`
+	FilePath  *string `db:"file_path"    json:"-"`
+	FileType  *string `db:"file_type"    json:"file_type,omitempty"`
+	FileHash  *string `db:"file_hash"    json:"-"`
+	AddedDate string  `db:"added_date"   json:"added_date"`
+	SyncState *string `db:"sync_state"   json:"sync_state,omitempty"`
+	Notes     *string `db:"notes"        json:"notes,omitempty"`
 	// The following exist to make BibTeX export possible - see
 	// handlers/bibtex.go. ItemType is free text (e.g. "journalArticle",
 	// "book") rather than a fixed enum - it's whatever the source (Zotero

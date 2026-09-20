@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -25,24 +24,24 @@ import (
 func itemResponse(e *env.Env, item *models.LibraryItem) map[string]any {
 	tags, _ := e.Repo.GetTagsForItem(item.UUID)
 	return map[string]any{
-		"id":           item.UUID,
-		"title":        item.Title,
-		"authors":      item.Authors,
-		"doi":          item.Doi,
-		"isbn":         item.Isbn,
-		"year":         item.Year,
-		"source_url":   item.SourceUrl,
-		"file_type":    item.FileType,
-		"added_date":   item.AddedDate,
-		"delivered_at": item.DeliveredAt,
-		"notes":        item.Notes,
-		"item_type":    item.ItemType,
-		"venue":        item.Venue,
-		"volume":       item.Volume,
-		"number":       item.Number,
-		"pages":        item.Pages,
-		"publisher":    item.Publisher,
-		"tags":         tags,
+		"id":         item.UUID,
+		"title":      item.Title,
+		"authors":    item.Authors,
+		"doi":        item.Doi,
+		"isbn":       item.Isbn,
+		"year":       item.Year,
+		"source_url": item.SourceUrl,
+		"file_type":  item.FileType,
+		"added_date": item.AddedDate,
+		"sync_state": item.SyncState,
+		"notes":      item.Notes,
+		"item_type":  item.ItemType,
+		"venue":      item.Venue,
+		"volume":     item.Volume,
+		"number":     item.Number,
+		"pages":      item.Pages,
+		"publisher":  item.Publisher,
+		"tags":       tags,
 	}
 }
 
@@ -66,7 +65,7 @@ func APIGetItems(e *env.Env) http.HandlerFunc {
 		q := r.URL.Query()
 		filter := repository.ItemFilter{
 			Query:     q.Get("q"),
-			Delivered: parseDeliveredParam(q.Get("delivered")),
+			SyncState: parseSyncStateParam(q.Get("sync_state")),
 		}
 
 		items, err := e.Repo.ListItems(env.UserFromContext(r.Context()).UUID, filter)
@@ -359,40 +358,125 @@ func APIDeleteItem(e *env.Env) http.HandlerFunc {
 	}
 }
 
-// APIMarkDelivered records that the Sync-to-Kobo screen just copied this
-// item's file onto the device.
-func APIMarkDelivered(e *env.Env) http.HandlerFunc {
+// stringOrEmpty reads a *string's value, treating nil as "" - lets the
+// transition table below compare against models.SyncState* without a nil
+// check at every branch.
+func stringOrEmpty(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func ptr(s string) *string { return &s }
+
+// nextStateOnTick is what "I want this on the Kobo" (checking the box, or
+// the skill/desktop app being told to sync an item) means for the current
+// state. Already synced or already queued to sync is a no-op; a pending
+// removal just gets cancelled, since the file's still actually there.
+func nextStateOnTick(current *string) *string {
+	switch stringOrEmpty(current) {
+	case models.SyncStateRequestRemove:
+		return ptr(models.SyncStateSynced)
+	case models.SyncStateSynced, models.SyncStateRequestSync:
+		return current
+	default:
+		return ptr(models.SyncStateRequestSync)
+	}
+}
+
+// nextStateOnUntick is what "I don't want this on the Kobo anymore" means.
+// A request that never actually got copied is simply cancelled; an item
+// that's really on the device needs a request_remove so a poller goes and
+// deletes the file, rather than the app just forgetting about it.
+func nextStateOnUntick(current *string) *string {
+	switch stringOrEmpty(current) {
+	case models.SyncStateSynced:
+		return ptr(models.SyncStateRequestRemove)
+	case models.SyncStateRequestSync:
+		return nil
+	default:
+		return current
+	}
+}
+
+// APIRequestSync handles "tick the box" - queues the item to be copied to
+// the Kobo (or cancels a pending removal), for whichever poller (browser
+// Sync screen, the skill, a future desktop app) picks up request_sync
+// next.
+func APIRequestSync(e *env.Env) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		item := loadOwnedItem(e, w, r)
 		if item == nil {
 			return
 		}
-		now := time.Now().UTC().Format(time.RFC3339)
-		if err := e.Repo.SetItemDelivered(item.UUID, env.UserFromContext(r.Context()).UUID, now); err != nil {
-			e.Log.Error("SetItemDelivered failed", "error", err)
-			writeError(w, http.StatusInternalServerError, "could not mark delivered")
+		next := nextStateOnTick(item.SyncState)
+		if err := e.Repo.SetItemSyncState(item.UUID, env.UserFromContext(r.Context()).UUID, next); err != nil {
+			e.Log.Error("SetItemSyncState failed", "error", err)
+			writeError(w, http.StatusInternalServerError, "could not request sync")
 			return
 		}
-		item.DeliveredAt = &now
+		item.SyncState = next
 		writeJSON(w, http.StatusOK, itemResponse(e, item))
 	}
 }
 
-// APIClearDelivered resets an item back to "pending" - for when the Sync
-// screen finds the file it previously copied is no longer actually on the
-// device (the user deleted it directly on the Kobo).
-func APIClearDelivered(e *env.Env) http.HandlerFunc {
+// APICancelSync handles "untick the box" - either cancels a sync that
+// hasn't happened yet, or queues removal of a file that's actually on the
+// device.
+func APICancelSync(e *env.Env) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		item := loadOwnedItem(e, w, r)
 		if item == nil {
 			return
 		}
-		if err := e.Repo.ClearItemDelivered(item.UUID, env.UserFromContext(r.Context()).UUID); err != nil {
-			e.Log.Error("ClearItemDelivered failed", "error", err)
-			writeError(w, http.StatusInternalServerError, "could not clear delivered status")
+		next := nextStateOnUntick(item.SyncState)
+		if err := e.Repo.SetItemSyncState(item.UUID, env.UserFromContext(r.Context()).UUID, next); err != nil {
+			e.Log.Error("SetItemSyncState failed", "error", err)
+			writeError(w, http.StatusInternalServerError, "could not cancel sync")
 			return
 		}
-		item.DeliveredAt = nil
+		item.SyncState = next
+		writeJSON(w, http.StatusOK, itemResponse(e, item))
+	}
+}
+
+// APIAckSync is how a poller (browser, skill, desktop app) reports back
+// after actually touching the device: "synced" once a request_sync item's
+// file is copied, "removed" once a request_remove item's file is deleted.
+// It's a plain report, not itself a transition decision - the caller
+// already did the real work, this just records it.
+func APIAckSync(e *env.Env) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		item := loadOwnedItem(e, w, r)
+		if item == nil {
+			return
+		}
+		var input struct {
+			Result string `json:"result"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			writeError(w, http.StatusBadRequest, "could not parse body")
+			return
+		}
+
+		var next *string
+		switch input.Result {
+		case "synced":
+			next = ptr(models.SyncStateSynced)
+		case "removed":
+			next = nil
+		default:
+			writeError(w, http.StatusBadRequest, `result must be "synced" or "removed"`)
+			return
+		}
+
+		if err := e.Repo.SetItemSyncState(item.UUID, env.UserFromContext(r.Context()).UUID, next); err != nil {
+			e.Log.Error("SetItemSyncState failed", "error", err)
+			writeError(w, http.StatusInternalServerError, "could not ack sync")
+			return
+		}
+		item.SyncState = next
 		writeJSON(w, http.StatusOK, itemResponse(e, item))
 	}
 }
@@ -573,15 +657,14 @@ func APIRemoveItemTag(e *env.Env) http.HandlerFunc {
 	}
 }
 
-// parseDeliveredParam turns "true"/"false" into a *bool, nil for anything
-// else (including empty, meaning "don't filter").
-func parseDeliveredParam(v string) *bool {
-	if v == "" {
-		return nil
+// parseSyncStateParam validates ?sync_state= against the known states,
+// returning "" (no filter) for anything else - including empty, and
+// including typos, rather than silently matching everything.
+func parseSyncStateParam(v string) string {
+	switch v {
+	case models.SyncStateRequestSync, models.SyncStateSynced, models.SyncStateRequestRemove:
+		return v
+	default:
+		return ""
 	}
-	b, err := strconv.ParseBool(v)
-	if err != nil {
-		return nil
-	}
-	return &b
 }

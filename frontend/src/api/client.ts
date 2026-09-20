@@ -30,6 +30,8 @@ export type Tag = {
   name: string;
 };
 
+export type SyncState = 'request_sync' | 'synced' | 'request_remove';
+
 export type LibraryItem = {
   id: string;
   title: string;
@@ -40,7 +42,7 @@ export type LibraryItem = {
   source_url?: string;
   file_type?: string;
   added_date: string;
-  delivered_at?: string;
+  sync_state?: SyncState;
   notes?: string;
   item_type?: string;
   venue?: string;
@@ -67,7 +69,7 @@ export type ApiToken = {
 
 export type ListItemsParams = {
   q?: string;
-  delivered?: boolean;
+  sync_state?: SyncState;
 };
 
 export type ItemMetadataInput = {
@@ -93,7 +95,7 @@ export const api = {
   listItems: (params: ListItemsParams = {}) => {
     const qs = new URLSearchParams();
     if (params.q) qs.set('q', params.q);
-    if (params.delivered !== undefined) qs.set('delivered', String(params.delivered));
+    if (params.sync_state) qs.set('sync_state', params.sync_state);
     const suffix = qs.toString() ? `?${qs.toString()}` : '';
     return request<LibraryItem[]>(`/api/v1/items${suffix}`);
   },
@@ -124,8 +126,10 @@ export const api = {
   removeTag: (id: string, tagId: string) =>
     request<LibraryItem>(`/api/v1/items/${id}/tags/${tagId}`, { method: 'DELETE' }),
 
-  markDelivered: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/delivered`, { method: 'POST' }),
-  clearDelivered: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/delivered`, { method: 'DELETE' }),
+  requestSync: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/sync`, { method: 'POST' }),
+  cancelSync: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/sync`, { method: 'DELETE' }),
+  ackSync: (id: string, result: 'synced' | 'removed') =>
+    request<LibraryItem>(`/api/v1/items/${id}/sync/ack`, { method: 'POST', body: JSON.stringify({ result }) }),
 
   listTokens: () => request<ApiToken[]>('/api/v1/tokens'),
   createToken: (name: string) =>

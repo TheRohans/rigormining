@@ -25,14 +25,13 @@ type DataRepository struct {
 	getTokensByUserIdQuery *sqlx.Stmt
 	deleteTokenQuery       *sqlx.Stmt
 
-	createItemQuery      *sqlx.Stmt
+	createItemQuery       *sqlx.Stmt
 	updateItemQuery       *sqlx.Stmt
 	updateItemFileQuery   *sqlx.Stmt
 	deleteItemQuery       *sqlx.Stmt
 	getItemByIdQuery      *sqlx.Stmt
-	getItemByHashQuery      *sqlx.Stmt
-	setItemDeliveredQuery   *sqlx.Stmt
-	clearItemDeliveredQuery *sqlx.Stmt
+	getItemByHashQuery    *sqlx.Stmt
+	setItemSyncStateQuery *sqlx.Stmt
 
 	upsertTagQuery      *sqlx.Stmt
 	attachTagQuery      *sqlx.Stmt
@@ -138,12 +137,8 @@ func Attach(schema string, db *sqlx.DB, driver string) *DataRepository {
 		SELECT * FROM library_item WHERE file_hash = $1 AND user_uuid = $2
 	`, db)
 
-	r.setItemDeliveredQuery = prepareQuery(`
-		UPDATE library_item SET delivered_at = $1 WHERE uuid = $2 AND user_uuid = $3
-	`, db)
-
-	r.clearItemDeliveredQuery = prepareQuery(`
-		UPDATE library_item SET delivered_at = NULL WHERE uuid = $1 AND user_uuid = $2
+	r.setItemSyncStateQuery = prepareQuery(`
+		UPDATE library_item SET sync_state = $1 WHERE uuid = $2 AND user_uuid = $3
 	`, db)
 
 	r.upsertTagQuery = prepareQuery(`
@@ -313,17 +308,13 @@ func (r *DataRepository) GetItemByHash(hash string, userId string) (*models.Libr
 	return nil, sql.ErrNoRows
 }
 
-func (r *DataRepository) SetItemDelivered(itemId string, userId string, deliveredAt string) error {
-	_, err := r.setItemDeliveredQuery.Exec(deliveredAt, itemId, userId)
-	return err
-}
-
-// ClearItemDelivered resets delivered_at to null - used when the Sync
-// screen finds a file it previously copied is no longer actually present
-// on the device (deleted by the user directly on the Kobo), so the item
-// goes back to "pending" instead of the app trusting a stale flag forever.
-func (r *DataRepository) ClearItemDelivered(itemId string, userId string) error {
-	_, err := r.clearItemDeliveredQuery.Exec(itemId, userId)
+// SetItemSyncState writes the item's sync_state directly - callers are
+// expected to have already worked out the right transition (see
+// handlers.nextStateOnTick/nextStateOnUntick), since the valid next state
+// depends on the current one. state == nil clears it back to "not on the
+// sync list".
+func (r *DataRepository) SetItemSyncState(itemId string, userId string, state *string) error {
+	_, err := r.setItemSyncStateQuery.Exec(state, itemId, userId)
 	return err
 }
 
@@ -331,7 +322,7 @@ func (r *DataRepository) ClearItemDelivered(itemId string, userId string) error 
 // "don't filter on this".
 type ItemFilter struct {
 	Query     string
-	Delivered *bool // nil = any, true = delivered, false = pending
+	SyncState string // "" = any, else one of the models.SyncState* constants
 }
 
 // ListItems is intentionally not a prepared statement, since the WHERE
@@ -345,12 +336,9 @@ func (r *DataRepository) ListItems(userId string, f ItemFilter) ([]models.Librar
 		like := "%" + f.Query + "%"
 		args = append(args, like, like)
 	}
-	if f.Delivered != nil {
-		if *f.Delivered {
-			clauses = append(clauses, "delivered_at IS NOT NULL")
-		} else {
-			clauses = append(clauses, "delivered_at IS NULL")
-		}
+	if f.SyncState != "" {
+		clauses = append(clauses, "sync_state = ?")
+		args = append(args, f.SyncState)
 	}
 
 	query := fmt.Sprintf(

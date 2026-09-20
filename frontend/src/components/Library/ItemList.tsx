@@ -63,8 +63,8 @@ export const ItemList: React.FC<ItemListProps> = ({ items, viewItem, selectedIds
           <div className="flex items-center gap-2 flex-shrink-0">
             {typeBadge(item.file_type, item.source_url)}
             <span
-              className={`h-1.5 w-1.5 rounded-full ${item.delivered_at ? 'bg-green-500' : 'bg-gray-300'}`}
-              title={item.delivered_at ? 'On Kobo' : 'Not synced'}
+              className={`h-1.5 w-1.5 rounded-full ${item.sync_state === 'synced' ? 'bg-green-500' : 'bg-gray-300'}`}
+              title={item.sync_state === 'synced' ? 'On Kobo' : 'Not synced'}
             />
             {item.file_type && (
               <button
