@@ -1,9 +1,26 @@
-# Rigor Mining
+# Rigor Mining - Your Personal, Open Source Research Assistant
 
-Your dumping ground for research. Rigor Mining is a self-hosted library for
-papers and books (PDF/EPUB), with tag-based projects, a built-in reader,
-one-click sync to a Kobo, and a browser extension for capturing papers directly
-into the application.
+Rigor Mining is an application that helps you collect research papers and books (PDF and EPUB), organize them with tags, preview them with a built-in reader, use a browser extension for capturing papers, and sync the papers to a [Kobo device](https://ereader.kobo.com/en-nz/products/kobo-elipsa-2e) for your reading pleasure.
+
+## Screenshots
+
+![Library](./docs/library.png "The main library")
+
+![Paper](./docs/using_extension.png "grabing a paper")
+
+![Reading](./docs/pdf_view.png "reading a paper")
+
+![Reference](./docs/bibtex.png "export reference")
+
+![Sync menu](./docs/sync_to_device.png "sync to device")
+
+![Sync to device](./docs/claude_skill.png "agent sync to your device")
+
+## AI Usage
+
+I wrote a good portion of this code by hand back in 2021, but other priorities took over so it got shelved. I worked on it again in 2023, but again it was put on the back burner. In order to kick it out the door, in 2026 I asked Claude Code to "finish it up" and get it into a state where I can deploy it.
+
+So if you are extremely adverse to using anything that has been touched by AI, you should probably give this one a miss, but the core of this application was written by a human.
 
 ## Getting Started
 
