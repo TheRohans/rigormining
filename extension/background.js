@@ -133,7 +133,7 @@ async function tryFetchPdf(tabId, pdfUrl) {
 async function capture(tabId) {
   const { serverUrl, apiToken } = await getSettings();
   if (!serverUrl || !apiToken) {
-    throw new Error('Set your Rigormining server URL and API token in the extension options first.');
+    throw new Error('Set your Rigor Mining server URL and API token in the extension options first.');
   }
 
   const tab = await browserAPI.tabs.get(tabId);
@@ -146,7 +146,7 @@ async function capture(tabId) {
   // that's already on disk is the library's own drag-and-drop upload.
   if (tab.url && tab.url.startsWith('file://')) {
     throw new Error(
-      "This is a local file - browsers don't allow extensions to read files from disk. Open your Rigormining library and drag the file into the upload area instead.",
+      "This is a local file - browsers don't allow extensions to read files from disk. Open your Rigor Mining library and drag the file into the upload area instead.",
     );
   }
 

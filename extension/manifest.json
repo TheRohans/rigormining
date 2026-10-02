@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Rigormining Capture",
+  "name": "Rigor Mining Capture",
   "version": "0.2.1",
-  "description": "Capture papers and books from the web into your self-hosted Rigormining library.",
+  "description": "Capture papers and books from the web into your self-hosted Rigor Mining library.",
   "action": {
     "default_popup": "popup.html"
   },
