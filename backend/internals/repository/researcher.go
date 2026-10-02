@@ -412,6 +412,7 @@ func (r *DataRepository) SetItemSyncState(itemId string, userId string, state *s
 type ItemFilter struct {
 	Query     string
 	SyncState string // "" = any, else one of the models.SyncState* constants
+	Tag       string // "" = any, else only items with exactly this tag
 }
 
 // ListItems is intentionally not a prepared statement, since the WHERE
@@ -428,6 +429,13 @@ func (r *DataRepository) ListItems(userId string, f ItemFilter) ([]models.Librar
 	if f.SyncState != "" {
 		clauses = append(clauses, "sync_state = ?")
 		args = append(args, f.SyncState)
+	}
+	if f.Tag != "" {
+		clauses = append(clauses, `uuid IN (
+			SELECT it.item_uuid FROM item_tag it
+			JOIN tag t ON t.uuid = it.tag_uuid
+			WHERE t.name = ?)`)
+		args = append(args, f.Tag)
 	}
 
 	query := fmt.Sprintf(

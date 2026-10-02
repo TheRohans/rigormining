@@ -149,6 +149,7 @@ export const api = {
   fileUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/file`,
   exportUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/export.md`,
   bibtexUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/export.bib`,
+  tagBibtexUrl: (tag: string) => `${API_BASE}/api/v1/items/export.bib?tag=${encodeURIComponent(tag)}`,
   extensionUrl: (browser: 'chrome' | 'firefox') => `${API_BASE}/api/v1/extension/${browser}`,
   skillUrl: (name: string) => `${API_BASE}/api/v1/skills/${name}`,
 

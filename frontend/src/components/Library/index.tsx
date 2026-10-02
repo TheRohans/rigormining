@@ -187,8 +187,22 @@ export const Library: React.FC = () => {
                     />
                   </div>
 
+                  {selectedTag !== null && selectedTag !== UNTAGGED && (
+                    <a
+                      href={api.tagBibtexUrl(selectedTag)}
+                      className="ml-auto px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 whitespace-nowrap"
+                      title={`Download every item tagged "${selectedTag}" as one .bib file`}
+                    >
+                      Export to BibTeX
+                    </a>
+                  )}
+
                   {selectedIds.size > 0 && (
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div
+                      className={`flex items-center gap-2 ${
+                        selectedTag !== null && selectedTag !== UNTAGGED ? '' : 'ml-auto'
+                      }`}
+                    >
                       <span className="text-xs text-gray-500">{selectedIds.size} selected</span>
                       <input
                         list="rigormining-project-names"

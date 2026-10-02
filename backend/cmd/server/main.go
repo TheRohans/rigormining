@@ -134,6 +134,8 @@ func run() error {
 	api.HandleFunc("/items", handlers.APIGetItems(e)).Methods("GET")
 	api.HandleFunc("/items", handlers.APICreateItem(e)).Methods("POST")
 	api.HandleFunc("/capture", handlers.APICapture(e)).Methods("POST")
+	// Before /items/{id}, which would otherwise match "export.bib" as an id.
+	api.HandleFunc("/items/export.bib", handlers.APIExportBibtexTag(e)).Methods("GET")
 	api.HandleFunc("/items/{id}", handlers.APIGetItem(e)).Methods("GET")
 	api.HandleFunc("/items/{id}", handlers.APIUpdateItem(e)).Methods("PATCH")
 	api.HandleFunc("/items/{id}", handlers.APIDeleteItem(e)).Methods("DELETE")
