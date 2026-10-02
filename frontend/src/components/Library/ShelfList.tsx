@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { CloudDownloadIcon, EyeIcon } from '@heroicons/react/solid';
-import { Document, DocumentDisplayType } from '../Highlights/types';
+
+type DocumentDisplayType = 'pdf' | 'pub' | 'png' | 'jpg';
+
+type Document = {
+  id: string;
+  library: string;
+  name: string;
+  fileName: string;
+  type: DocumentDisplayType;
+};
 
 type ShelfListProps = {
   path: string;

@@ -1,0 +1,24 @@
+{
+	"nodes":[
+		{"id":"ae892fccce08d300","type":"text","text":"# Researcher","x":335,"y":-643,"width":207,"height":70,"color":"6"},
+		{"id":"24a5c8e1ca8c02a6","type":"text","text":"# Web Site\nhttps://arxiv.org/ for example","x":316,"y":-145,"width":247,"height":82},
+		{"id":"9824d6c9cc0b7323","type":"text","text":"# Research Paper\nPDF","x":214,"y":-11,"width":193,"height":70,"color":"6"},
+		{"id":"2bd472c1a921cd05","type":"text","text":"# EPUB\nTextbook / Reference","x":468,"y":-10,"width":197,"height":68,"color":"6"},
+		{"id":"02af30bdbe489849","type":"text","text":"# Browser Extension\nChrome or Firefox\nWith extension to bookmark\n[[extension.canvas]]","x":326,"y":-339,"width":227,"height":119,"color":"6"},
+		{"id":"09857e4c32693b39","type":"text","text":"# EReader\nKobo (or Kindle)\nhttps://ereader.kobo.com/en-nz/products/kobo-elipsa-2e","x":718,"y":-658,"width":349,"height":93,"color":"6"},
+		{"id":"9a95b715d17c27eb","type":"text","text":"# RigorMining.com\n[[rigormining.canvas]]","x":761,"y":-317,"width":251,"height":78,"color":"1"},
+		{"id":"067a041eea670bdf","type":"text","text":"# AI\n[[../.agents/skills/kobo-sync]]","x":908,"y":-471,"width":219,"height":73,"color":"6"},
+		{"id":"b82b79cfb6a165ac","type":"text","text":"# Stitch\nhttps://github.com/robrohan/stitch","x":648,"y":-471,"width":217,"height":73}
+	],
+	"edges":[
+		{"id":"1a13e82a841e6fdf","fromNode":"9824d6c9cc0b7323","fromSide":"top","toNode":"24a5c8e1ca8c02a6","toSide":"bottom"},
+		{"id":"4c68a33492f644c0","fromNode":"2bd472c1a921cd05","fromSide":"top","toNode":"24a5c8e1ca8c02a6","toSide":"bottom"},
+		{"id":"0a1cd2bd57b9c308","fromNode":"02af30bdbe489849","fromSide":"bottom","toNode":"24a5c8e1ca8c02a6","toSide":"top","label":"find savable material"},
+		{"id":"72bc5370435458ee","fromNode":"02af30bdbe489849","fromSide":"right","toNode":"9a95b715d17c27eb","toSide":"left","label":"saves material via API"},
+		{"id":"82b7f04435eecc67","fromNode":"ae892fccce08d300","fromSide":"bottom","toNode":"02af30bdbe489849","toSide":"top","label":"find research material"},
+		{"id":"6c6e3761cfc4e83f","fromNode":"067a041eea670bdf","fromSide":"bottom","toNode":"9a95b715d17c27eb","toSide":"top","label":"syncs via API"},
+		{"id":"bedfca497c388e2f","fromNode":"ae892fccce08d300","fromSide":"right","toNode":"09857e4c32693b39","toSide":"left","label":"reads and takes notes"},
+		{"id":"9d1b50a6f9fe491a","fromNode":"067a041eea670bdf","fromSide":"top","toNode":"09857e4c32693b39","toSide":"bottom","label":"syncs via USB"},
+		{"id":"a415d860932f2779","fromNode":"09857e4c32693b39","fromSide":"bottom","toNode":"b82b79cfb6a165ac","toSide":"top","label":"access notes"}
+	]
+}
