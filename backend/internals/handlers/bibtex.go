@@ -132,9 +132,13 @@ func APIExportBibtex(e *env.Env) http.HandlerFunc {
 			bibtexField(&b, "year", strconv.Itoa(*item.Year))
 		}
 		if item.Venue != nil {
-			if entryType == "article" {
+			switch entryType {
+			case "article":
 				bibtexField(&b, "journal", *item.Venue)
-			} else {
+			case "misc":
+				// e.g. "arXiv preprint arXiv:2106.09685"
+				bibtexField(&b, "howpublished", *item.Venue)
+			default:
 				bibtexField(&b, "booktitle", *item.Venue)
 			}
 		}

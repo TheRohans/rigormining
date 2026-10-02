@@ -2,11 +2,34 @@ import React, { useEffect, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { ChevronLeftIcon, ExternalLinkIcon, XIcon } from '@heroicons/react/solid';
 import Navigation from '@components/App/Navigation';
-import { api, LibraryItem } from '../../api/client';
+import { api, ItemMetadataInput, LibraryItem } from '../../api/client';
 
 const label = 'block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1';
 const input =
   'block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500';
+
+// The looked-up fields the form shows, with their labels for the
+// "filled in ..." note.
+const citationFields: [keyof ItemMetadataInput & keyof LibraryItem, string][] = [
+  ['title', 'title'],
+  ['authors', 'authors'],
+  ['doi', 'DOI'],
+  ['isbn', 'ISBN'],
+  ['year', 'year'],
+  ['item_type', 'item type'],
+  ['venue', 'venue'],
+  ['volume', 'volume'],
+  ['number', 'number'],
+  ['pages', 'pages'],
+  ['publisher', 'publisher'],
+];
+
+const sourceNames: Record<string, string> = {
+  crossref: 'Crossref',
+  datacite: 'DataCite',
+  arxiv: 'arXiv',
+  openlibrary: 'Open Library',
+};
 
 export const ItemDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +40,10 @@ export const ItemDetail: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [lookingUp, setLookingUp] = useState(false);
+  const [lookupNote, setLookupNote] = useState<{ text: string; error: boolean } | null>(null);
+  // The form as it was before a lookup filled it in, for Undo.
+  const [beforeLookup, setBeforeLookup] = useState<LibraryItem | null>(null);
 
   const load = () => {
     api.getItem(id).then(setItem);
@@ -53,9 +80,56 @@ export const ItemDetail: React.FC = () => {
         publisher: item.publisher,
       });
       setItem(updated);
+      setBeforeLookup(null);
+      setLookupNote(null);
     } finally {
       setSaving(false);
     }
+  };
+
+  // Fills the form from the looked-up citation, replacing whatever is
+  // there - nothing is saved until Save, and Undo puts the form back.
+  const lookupCitation = async () => {
+    setLookingUp(true);
+    setLookupNote(null);
+    try {
+      const { source, matched_by, metadata } = await api.lookupCitation(item.id);
+      const updated = { ...item };
+      const changed: string[] = [];
+      for (const [key, name] of citationFields) {
+        const value = metadata[key];
+        if (value === undefined || value === '' || value === 0 || value === item[key]) continue;
+        (updated as Record<string, unknown>)[key] = value;
+        changed.push(name);
+      }
+      const from = `${sourceNames[source] ?? source} (matched by ${matched_by})`;
+      if (changed.length === 0) {
+        setLookupNote({ text: `Found on ${from} - everything already matches.`, error: false });
+        return;
+      }
+      setBeforeLookup(item);
+      setItem(updated);
+      setLookupNote({
+        text: `Filled in ${changed.join(', ')} from ${from}. Review, then Save.`,
+        error: false,
+      });
+    } catch (err) {
+      const message = (err as Error).message;
+      setLookupNote({
+        text: message.startsWith('404')
+          ? "Couldn't find a confident match - no DOI, arXiv ID or ISBN in the file, and the title didn't match anything."
+          : 'Lookup failed - the citation service may be busy, try again in a moment.',
+        error: true,
+      });
+    } finally {
+      setLookingUp(false);
+    }
+  };
+
+  const undoLookup = () => {
+    if (beforeLookup) setItem(beforeLookup);
+    setBeforeLookup(null);
+    setLookupNote(null);
   };
 
   const uploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +176,27 @@ export const ItemDetail: React.FC = () => {
         </Link>
 
         <div className="space-y-5 bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={lookupCitation}
+              disabled={lookingUp}
+              className="px-3 py-1.5 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50"
+              title="Find the title, authors, DOI and type from the PDF's DOI/arXiv ID/ISBN via Crossref, arXiv or Open Library"
+            >
+              {lookingUp ? 'Looking up...' : 'Look up citation'}
+            </button>
+            {lookupNote && (
+              <p className={`text-xs ${lookupNote.error ? 'text-red-600' : 'text-gray-600'}`}>
+                {lookupNote.text}
+                {beforeLookup && (
+                  <button onClick={undoLookup} className="ml-2 text-indigo-600 hover:underline">
+                    Undo
+                  </button>
+                )}
+              </p>
+            )}
+          </div>
+
           <div>
             <label className={label}>Title</label>
             <input className={input} value={item.title} onChange={field('title')} />

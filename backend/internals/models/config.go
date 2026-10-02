@@ -61,4 +61,17 @@ type Config struct {
 	Skills struct {
 		Dir string `conf:"default:./static/skills"`
 	}
+	// Lookup is the automatic citation lookup (Crossref, arXiv, Open
+	// Library) that fills in title/authors/DOI/type for new PDFs - see
+	// internals/citation.
+	Lookup struct {
+		Enabled bool `conf:"default:true"`
+		// Mailto is a contact email sent to Crossref, which moves requests
+		// into its faster, less rate-limited "polite" pool. Optional.
+		Mailto string
+		// Wait is how long an upload waits for the lookup before replying;
+		// a slower lookup finishes in the background and updates the item.
+		// Keep it under Web.WriteTimeout.
+		Wait time.Duration `conf:"default:2500ms"`
+	}
 }

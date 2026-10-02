@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	"gitlab.com/robrohan/rigormining/internals/citation"
 	"gitlab.com/robrohan/rigormining/internals/models"
 	"gitlab.com/robrohan/rigormining/internals/repository"
 )
@@ -20,6 +21,8 @@ type Env struct {
 	Cfg    *models.Config
 	Router *mux.Router
 	Repo   *repository.DataRepository
+	// Citation looks up bibliographic metadata; nil when disabled.
+	Citation *citation.Client
 }
 
 type contextKey int

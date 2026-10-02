@@ -186,10 +186,16 @@ func APICreateItem(e *env.Env) http.HandlerFunc {
 			return
 		}
 
+		autofill := startAutofill(e, &item, true)
+		pending := autofill.applyNow(e, &item)
+
 		if err := e.Repo.CreateItem(&item); err != nil {
 			e.Log.Error("CreateItem failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not create item")
 			return
+		}
+		if pending {
+			autofill.finishInBackground(e, item.UUID, item.UserId)
 		}
 
 		for _, tag := range meta.Tags {
@@ -520,10 +526,23 @@ func APIUploadItemFile(e *env.Env) http.HandlerFunc {
 			return
 		}
 
+		autofill := startAutofill(e, item, true)
+		pending := autofill.applyNow(e, item)
+
 		if err := e.Repo.UpdateItemFile(item); err != nil {
 			e.Log.Error("UpdateItemFile failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not save file reference")
 			return
+		}
+		// UpdateItemFile only writes the file columns; the title taken from
+		// the PDF and any looked-up fields need saving too.
+		if err := e.Repo.UpdateItem(item); err != nil {
+			e.Log.Error("UpdateItem failed", "error", err)
+			writeError(w, http.StatusInternalServerError, "could not save item metadata")
+			return
+		}
+		if pending {
+			autofill.finishInBackground(e, item.UUID, item.UserId)
 		}
 
 		if oldPath != nil && *oldPath != *item.FilePath {

@@ -89,6 +89,12 @@ export type ItemMetadataInput = {
   publisher?: string;
 };
 
+export type CitationLookup = {
+  source: 'crossref' | 'datacite' | 'arxiv' | 'openlibrary';
+  matched_by: string;
+  metadata: ItemMetadataInput;
+};
+
 export const api = {
   whoami: () => request<WhoAmI>('/api/v1/whoami'),
 
@@ -119,6 +125,10 @@ export const api = {
     request<LibraryItem>(`/api/v1/items/${id}`, { method: 'PATCH', body: JSON.stringify(metadata) }),
 
   deleteItem: (id: string) => request<void>(`/api/v1/items/${id}`, { method: 'DELETE' }),
+
+  // Looks up the item's citation (Crossref/arXiv/Open Library) without
+  // saving anything.
+  lookupCitation: (id: string) => request<CitationLookup>(`/api/v1/items/${id}/citation`),
 
   addTag: (id: string, name: string) =>
     request<LibraryItem>(`/api/v1/items/${id}/tags`, { method: 'POST', body: JSON.stringify({ name }) }),

@@ -15,6 +15,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rubenv/sql-migrate v1.3.0
 	golang.org/x/oauth2 v0.4.0
+	golang.org/x/text v0.40.0
 )
 
 require (
@@ -30,7 +31,6 @@ require (
 	golang.org/x/crypto v0.54.0 // indirect
 	golang.org/x/image v0.44.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
