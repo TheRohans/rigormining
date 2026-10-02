@@ -1,13 +1,13 @@
 {
 	"nodes":[
-		{"id":"ec0503ce73c18777","type":"text","text":"# Compute Host\n[[../backend/cmd]]\n[[../backend/internals/models]]\n[[../backend/internals/repository]]\n[[../backend/templates]]","x":-136,"y":33,"width":269,"height":151,"color":"1"},
-		{"id":"0b79ecfea0486df0","type":"text","text":"# Database\n[[../backend/migrations]]","x":226,"y":65,"width":266,"height":86,"color":"2"},
+		{"id":"ec0503ce73c18777","type":"text","text":"# Compute Host\n[[../backend/cmd/server]]\n[[../backend/internals/env]]\n[[../backend/internals/models]]\n[[../backend/internals/repository]]\n[[../backend/internals/secret]]","x":-136,"y":33,"width":265,"height":156,"color":"1"},
+		{"id":"0b79ecfea0486df0","type":"text","text":"# Database\n[[../backend/migrations]]","x":230,"y":66,"width":266,"height":86,"color":"2"},
 		{"id":"df8771dd40fb812b","type":"text","text":"# Document Storage\n[[../backend/store]]","x":229,"y":190,"width":270,"height":81,"color":"2"},
-		{"id":"657bc4f9d89fa328","type":"text","text":"# Frontend\n[[../frontend]]","x":-450,"y":-217,"width":244,"height":99,"color":"1"},
+		{"id":"657bc4f9d89fa328","type":"text","text":"# Frontend\n[[../frontend]]\n[[../backend/templates]]\n","x":-450,"y":-217,"width":244,"height":99,"color":"1"},
 		{"id":"7e36a1dceb1bc970","type":"text","text":"# Auth\n[[../backend/internals/auth]]","x":227,"y":-54,"width":267,"height":88,"color":"1"},
-		{"id":"e6d4fce5a8d5a2e2","type":"text","text":"# API\n[[../backend/internals/handlers]]","x":-132,"y":-224,"width":264,"height":112,"color":"1"},
+		{"id":"e6d4fce5a8d5a2e2","type":"text","text":"# API\n[[../backend/internals/handlers]]","x":-136,"y":-222,"width":264,"height":112,"color":"1"},
 		{"id":"86c7389ef844e277","type":"file","file":"root.canvas","subpath":"#ae892fccce08d300","x":-439,"y":-422,"width":221,"height":96},
-		{"id":"c909b27467e377a7","type":"file","file":"root.canvas","subpath":"#067a041eea670bdf","x":-134,"y":-432,"width":263,"height":104},
+		{"id":"c909b27467e377a7","type":"file","file":"root.canvas","subpath":"#067a041eea670bdf","x":-135,"y":-425,"width":263,"height":104},
 		{"id":"7a1cd704c5382a77","type":"file","file":"root.canvas","subpath":"#02af30bdbe489849","x":171,"y":-428,"width":277,"height":136}
 	],
 	"edges":[
