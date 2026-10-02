@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -87,6 +86,11 @@ func run() error {
 	}
 
 	repo := repository.Attach(cfg.Base.Root, db, cfg.DB.Driver)
+	if n, err := repo.HashLegacyTokens(); err != nil {
+		return errors.Wrap(err, "hashing legacy API tokens")
+	} else if n > 0 {
+		logger.Info("hashed legacy plaintext API tokens", "count", n)
+	}
 
 	// =========================================================================
 	// Debug service (pprof/expvar)
@@ -99,14 +103,12 @@ func run() error {
 	// Routes
 	router := mux.NewRouter()
 
-	randState := fmt.Sprintf("%x", rand.Int())
 	e := &env.Env{
-		Db:        db,
-		Log:       logger,
-		Cfg:       &cfg,
-		Router:    router,
-		RandState: randState,
-		Repo:      repo,
+		Db:     db,
+		Log:    logger,
+		Cfg:    &cfg,
+		Router: router,
+		Repo:   repo,
 	}
 
 	router.HandleFunc("/login", auth.HandleLogin(e, oauthCfg)).Methods("GET")
@@ -115,7 +117,9 @@ func run() error {
 
 	secure := router.PathPrefix("/-/").Subrouter()
 	secure.Use(auth.LoginVerify(e, repo))
-	secure.HandleFunc("/logout", auth.HandleLogout(e)).Methods("GET")
+	// POST so another site can't log you out with a link or <img>; the
+	// SameSite=Lax session cookie isn't sent on cross-site POSTs.
+	secure.HandleFunc("/logout", auth.HandleLogout(e, repo)).Methods("POST")
 
 	api := router.PathPrefix("/api/v1").Subrouter()
 	api.Use(auth.APILoginVerify(e, repo))

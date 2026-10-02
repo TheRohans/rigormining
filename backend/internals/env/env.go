@@ -15,12 +15,11 @@ import (
 // must never hold per-request data - see WithUser/UserFromContext below for
 // the authenticated user, which is per-request.
 type Env struct {
-	Db        *sqlx.DB
-	Log       *slog.Logger
-	Cfg       *models.Config
-	Router    *mux.Router
-	RandState string
-	Repo      *repository.DataRepository
+	Db     *sqlx.DB
+	Log    *slog.Logger
+	Cfg    *models.Config
+	Router *mux.Router
+	Repo   *repository.DataRepository
 }
 
 type contextKey int

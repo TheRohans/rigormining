@@ -17,7 +17,6 @@ type User struct {
 	Name    *string `db:"username" json:"name,omitempty"`
 	Picture *string `db:"picture"  json:"picture,omitempty"`
 	AuthId  string  `db:"authid"   json:"-"`
-	Salt    *string `db:"salt"     json:"-"`
 }
 
 func NewUser(authid string, email string, picture string) *User {

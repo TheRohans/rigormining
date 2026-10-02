@@ -2,11 +2,10 @@ package auth
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -17,9 +16,18 @@ import (
 	"gitlab.com/robrohan/rigormining/internals/env"
 	"gitlab.com/robrohan/rigormining/internals/models"
 	"gitlab.com/robrohan/rigormining/internals/repository"
+	"gitlab.com/robrohan/rigormining/internals/secret"
 )
 
-const CookieName = "RM_AT"
+const (
+	// CookieName holds the raw session id; the session table stores its hash.
+	CookieName = "RM_AT"
+	// stateCookieName holds the OAuth state for one in-flight login.
+	stateCookieName = "RM_OS"
+
+	sessionTTL = 30 * 24 * time.Hour
+	stateTTL   = 10 * time.Minute
+)
 
 // NewOAuthConfig builds the provider config (Google by default) from the
 // app's env-driven Config.
@@ -49,27 +57,50 @@ func addCookie(w http.ResponseWriter, name, value string, ttl time.Duration) {
 	})
 }
 
-// HandleLogin redirects the browser to the OAuth provider.
+// startSession creates a server-side session for user and sets its cookie.
+func startSession(w http.ResponseWriter, repo *repository.DataRepository, user *models.User) error {
+	raw, err := repo.CreateSession(user.UUID, sessionTTL)
+	if err != nil {
+		return err
+	}
+	addCookie(w, CookieName, raw, sessionTTL)
+	return nil
+}
+
+// HandleLogin redirects the browser to the OAuth provider, with a fresh
+// state value bound to this browser by a short-lived cookie, so a callback
+// can't be forged or replayed into someone else's browser (login CSRF).
 func HandleLogin(e *env.Env, oauthCfg *oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		url := oauthCfg.AuthCodeURL(e.RandState)
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		state := secret.New()
+		addCookie(w, stateCookieName, state, stateTTL)
+		http.Redirect(w, r, oauthCfg.AuthCodeURL(state), http.StatusTemporaryRedirect)
 	}
 }
 
-// HandleLogout clears the session cookie.
-func HandleLogout(e *env.Env) http.HandlerFunc {
+// HandleLogout deletes this browser's session server-side and clears its
+// cookie. Other devices stay logged in.
+func HandleLogout(e *env.Env, repo *repository.DataRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if cookie, err := r.Cookie(CookieName); err == nil && cookie.Value != "" {
+			if err := repo.DeleteSession(cookie.Value); err != nil {
+				e.Log.Error("could not delete session", "error", err)
+			}
+		}
 		addCookie(w, CookieName, "", -1*time.Hour)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
-// HandleCallback exchanges the OAuth code, upserts the user, and sets the
-// session cookie.
+// HandleCallback checks the OAuth state, exchanges the code, upserts the
+// user, and starts a session.
 func HandleCallback(e *env.Env, oauthCfg *oauth2.Config, repo *repository.DataRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.FormValue("state") != e.RandState {
+		stateCookie, err := r.Cookie(stateCookieName)
+		// The state is single use, whatever happens next.
+		addCookie(w, stateCookieName, "", -1*time.Hour)
+		if err != nil || stateCookie.Value == "" ||
+			subtle.ConstantTimeCompare([]byte(r.FormValue("state")), []byte(stateCookie.Value)) != 1 {
 			e.Log.Error("oauth state mismatch")
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 			return
@@ -104,9 +135,8 @@ func HandleCallback(e *env.Env, oauthCfg *oauth2.Config, repo *repository.DataRe
 			return
 		}
 
-		salt := fmt.Sprintf("%x", rand.Int())
 		newUser := models.NewUser(userInfo.Id, userInfo.Email, userInfo.Picture)
-		if err := repo.UpsertUser(newUser, salt); err != nil {
+		if err := repo.UpsertUser(newUser); err != nil {
 			e.Log.Error("could not upsert user", "error", err)
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 			return
@@ -119,8 +149,11 @@ func HandleCallback(e *env.Env, oauthCfg *oauth2.Config, repo *repository.DataRe
 			return
 		}
 
-		hash := md5.Sum([]byte(user.Email + user.AuthId + salt))
-		addCookie(w, CookieName, fmt.Sprintf("%s:%x", user.UUID, hash), 30*24*time.Hour)
+		if err := startSession(w, repo, user); err != nil {
+			e.Log.Error("could not create session", "error", err)
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			return
+		}
 
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -136,9 +169,8 @@ func HandleDevLogin(e *env.Env, repo *repository.DataRepository) http.HandlerFun
 			return
 		}
 
-		salt := fmt.Sprintf("%x", rand.Int())
 		devUser := models.NewUser("dev-local", "dev@localhost", "")
-		if err := repo.UpsertUser(devUser, salt); err != nil {
+		if err := repo.UpsertUser(devUser); err != nil {
 			e.Log.Error("dev login upsert failed", "error", err)
 			http.Error(w, "dev login failed", http.StatusInternalServerError)
 			return
@@ -151,39 +183,24 @@ func HandleDevLogin(e *env.Env, repo *repository.DataRepository) http.HandlerFun
 			return
 		}
 
-		hash := md5.Sum([]byte(user.Email + user.AuthId + salt))
-		addCookie(w, CookieName, fmt.Sprintf("%s:%x", user.UUID, hash), 30*24*time.Hour)
+		if err := startSession(w, repo, user); err != nil {
+			e.Log.Error("dev login session failed", "error", err)
+			http.Error(w, "dev login failed", http.StatusInternalServerError)
+			return
+		}
 
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
+// verifyCookie resolves the session cookie to its user. The lookup is by
+// the hash of the cookie value, so there's no secret comparison to time.
 func verifyCookie(r *http.Request, repo *repository.DataRepository) (*models.User, error) {
 	cookie, err := r.Cookie(CookieName)
 	if err != nil || cookie.Value == "" {
 		return nil, fmt.Errorf("missing auth cookie")
 	}
-
-	parts := strings.SplitN(cookie.Value, ":", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("malformed auth cookie")
-	}
-
-	user, err := repo.GetUserById(parts[0])
-	if err != nil {
-		return nil, err
-	}
-
-	salt := ""
-	if user.Salt != nil {
-		salt = *user.Salt
-	}
-	hash := md5.Sum([]byte(user.Email + user.AuthId + salt))
-	if fmt.Sprintf("%x", hash) != parts[1] {
-		return nil, fmt.Errorf("auth cookie hash mismatch")
-	}
-
-	return user, nil
+	return repo.GetUserBySession(cookie.Value)
 }
 
 // LoginVerify protects HTML/browser routes: cookie only, redirects to /login

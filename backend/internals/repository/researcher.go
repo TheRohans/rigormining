@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/robrohan/rigormining/internals/models"
+	"gitlab.com/robrohan/rigormining/internals/secret"
 )
 
 // DataRepository holds prepared statements for every table the app uses.
@@ -20,6 +22,11 @@ type DataRepository struct {
 	getUserByEmailQuery *sqlx.Stmt
 	getUserByIdQuery    *sqlx.Stmt
 	getUserByTokenQuery *sqlx.Stmt
+
+	createSessionQuery         *sqlx.Stmt
+	getUserBySessionQuery      *sqlx.Stmt
+	deleteSessionQuery         *sqlx.Stmt
+	deleteExpiredSessionsQuery *sqlx.Stmt
 
 	createTokenQuery       *sqlx.Stmt
 	getTokensByUserIdQuery *sqlx.Stmt
@@ -52,33 +59,54 @@ func Attach(schema string, db *sqlx.DB, driver string) *DataRepository {
 	r := DataRepository{Db: db}
 
 	r.upsertUserQuery = prepareQuery(`
-		INSERT INTO users (uuid, authid, email, picture, salt)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO users (uuid, authid, email, picture)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (email) DO UPDATE
-			SET picture = $4,
-			salt = $5
+			SET picture = $4
 	`, db)
 
 	r.getUserByEmailQuery = prepareQuery(`
-		SELECT uuid, email, username, picture, authid, salt
+		SELECT uuid, email, username, picture, authid
 		FROM users WHERE email = $1
 	`, db)
 
 	r.getUserByIdQuery = prepareQuery(`
-		SELECT uuid, email, username, picture, authid, salt
+		SELECT uuid, email, username, picture, authid
 		FROM users WHERE uuid = $1
 	`, db)
 
 	r.getUserByTokenQuery = prepareQuery(`
-		SELECT u.uuid, u.email, u.username, u.picture, u.authid, u.salt
+		SELECT u.uuid, u.email, u.username, u.picture, u.authid
 		FROM users u
 		JOIN token t ON u.uuid = t.user_uuid
 		WHERE t.value = $1
 	`, db)
 
+	r.createSessionQuery = prepareQuery(`
+		INSERT INTO session (id_hash, user_uuid, created_at, expires_at)
+		VALUES ($1, $2, $3, $4)
+	`, db)
+
+	// expires_at and $2 are both RFC3339 UTC strings, which sort correctly
+	// as text.
+	r.getUserBySessionQuery = prepareQuery(`
+		SELECT u.uuid, u.email, u.username, u.picture, u.authid
+		FROM users u
+		JOIN session s ON u.uuid = s.user_uuid
+		WHERE s.id_hash = $1 AND s.expires_at > $2
+	`, db)
+
+	r.deleteSessionQuery = prepareQuery(`
+		DELETE FROM session WHERE id_hash = $1
+	`, db)
+
+	r.deleteExpiredSessionsQuery = prepareQuery(`
+		DELETE FROM session WHERE expires_at <= $1
+	`, db)
+
 	r.createTokenQuery = prepareQuery(`
-		INSERT INTO token (uuid, user_uuid, name, value, created_at)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO token (uuid, user_uuid, name, value, created_at, hashed)
+		VALUES ($1, $2, $3, $4, $5, 1)
 	`, db)
 
 	r.getTokensByUserIdQuery = prepareQuery(`
@@ -167,8 +195,8 @@ func Attach(schema string, db *sqlx.DB, driver string) *DataRepository {
 // -------------------------------------------------------------------------
 // Users
 
-func (r *DataRepository) UpsertUser(user *models.User, salt string) error {
-	_, err := r.upsertUserQuery.Exec(user.UUID, user.AuthId, user.Email, user.Picture, salt)
+func (r *DataRepository) UpsertUser(user *models.User) error {
+	_, err := r.upsertUserQuery.Exec(user.UUID, user.AuthId, user.Email, user.Picture)
 	return err
 }
 
@@ -180,8 +208,9 @@ func (r *DataRepository) GetUserById(id string) (*models.User, error) {
 	return scanOneUser(r.getUserByIdQuery.Queryx(id))
 }
 
+// GetUserByToken looks up the owner of a raw (unhashed) API token.
 func (r *DataRepository) GetUserByToken(value string) (*models.User, error) {
-	return scanOneUser(r.getUserByTokenQuery.Queryx(value))
+	return scanOneUser(r.getUserByTokenQuery.Queryx(secret.Hash(value)))
 }
 
 func scanOneUser(rows *sqlx.Rows, err error) (*models.User, error) {
@@ -205,11 +234,71 @@ func scanOneUser(rows *sqlx.Rows, err error) (*models.User, error) {
 }
 
 // -------------------------------------------------------------------------
+// Sessions
+
+const sessionTimeFormat = time.RFC3339
+
+// CreateSession stores a new browser session for userId and returns the raw
+// session id to put in the cookie. Only its hash is stored. Expired sessions
+// are swept at the same time, since logins are rare enough for that to be
+// free.
+func (r *DataRepository) CreateSession(userId string, ttl time.Duration) (string, error) {
+	now := time.Now().UTC()
+	if _, err := r.deleteExpiredSessionsQuery.Exec(now.Format(sessionTimeFormat)); err != nil {
+		return "", err
+	}
+
+	raw := secret.New()
+	_, err := r.createSessionQuery.Exec(
+		secret.Hash(raw), userId,
+		now.Format(sessionTimeFormat), now.Add(ttl).Format(sessionTimeFormat),
+	)
+	if err != nil {
+		return "", err
+	}
+	return raw, nil
+}
+
+// GetUserBySession returns the user owning an unexpired raw session id.
+func (r *DataRepository) GetUserBySession(raw string) (*models.User, error) {
+	return scanOneUser(r.getUserBySessionQuery.Queryx(
+		secret.Hash(raw), time.Now().UTC().Format(sessionTimeFormat),
+	))
+}
+
+func (r *DataRepository) DeleteSession(raw string) error {
+	_, err := r.deleteSessionQuery.Exec(secret.Hash(raw))
+	return err
+}
+
+// -------------------------------------------------------------------------
 // API tokens
 
+// CreateToken stores token with its Value hashed. token.Value itself is left
+// as the raw value so the caller can show it to the user once.
 func (r *DataRepository) CreateToken(token *models.Token) error {
-	_, err := r.createTokenQuery.Exec(token.UUID, token.UserId, token.Name, token.Value, token.CreatedAt)
+	_, err := r.createTokenQuery.Exec(token.UUID, token.UserId, token.Name, secret.Hash(token.Value), token.CreatedAt)
 	return err
+}
+
+// HashLegacyTokens replaces any API token still stored in plaintext (from
+// before migration 000005) with its hash, so existing extension and sync
+// tokens keep working. Safe to run on every startup.
+func (r *DataRepository) HashLegacyTokens() (int, error) {
+	var legacy []struct {
+		UUID  string `db:"uuid"`
+		Value string `db:"value"`
+	}
+	if err := r.Db.Select(&legacy, `SELECT uuid, value FROM token WHERE hashed = 0`); err != nil {
+		return 0, err
+	}
+	for _, t := range legacy {
+		_, err := r.Db.Exec(`UPDATE token SET value = $1, hashed = 1 WHERE uuid = $2`, secret.Hash(t.Value), t.UUID)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return len(legacy), nil
 }
 
 func (r *DataRepository) GetTokensByUserId(userId string) ([]models.Token, error) {

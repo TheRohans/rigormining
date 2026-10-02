@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"math/rand"
 	"net/http"
 	"time"
 
@@ -12,6 +10,7 @@ import (
 
 	"gitlab.com/robrohan/rigormining/internals/env"
 	"gitlab.com/robrohan/rigormining/internals/models"
+	"gitlab.com/robrohan/rigormining/internals/secret"
 )
 
 // APIWhoAmI lets the SPA (after a cookie login) and the extension/setup
@@ -44,7 +43,7 @@ func APICreateToken(e *env.Env) http.HandlerFunc {
 			return
 		}
 
-		raw := fmt.Sprintf("%x%x", rand.Int63(), rand.Int63())
+		raw := secret.New()
 		token := models.Token{
 			UUID:      uuid.New().String(),
 			UserId:    env.UserFromContext(r.Context()).UUID,
