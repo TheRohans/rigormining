@@ -95,6 +95,21 @@ export type CitationLookup = {
   metadata: ItemMetadataInput;
 };
 
+export type TagSummary = {
+  name: string;
+  count: number;
+};
+
+// The user's tag list, fetched once and shared by every component that
+// wants it (tag autocomplete). Dropped whenever tags change, so the next
+// listTags() refetches.
+let tagsCache: Promise<TagSummary[]> | null = null;
+
+const invalidateTags = <T>(result: T): T => {
+  tagsCache = null;
+  return result;
+};
+
 export const api = {
   whoami: () => request<WhoAmI>('/api/v1/whoami'),
 
@@ -131,10 +146,34 @@ export const api = {
   lookupCitation: (id: string) => request<CitationLookup>(`/api/v1/items/${id}/citation`),
 
   addTag: (id: string, name: string) =>
-    request<LibraryItem>(`/api/v1/items/${id}/tags`, { method: 'POST', body: JSON.stringify({ name }) }),
+    request<LibraryItem>(`/api/v1/items/${id}/tags`, { method: 'POST', body: JSON.stringify({ name }) }).then(
+      invalidateTags,
+    ),
 
   removeTag: (id: string, tagId: string) =>
-    request<LibraryItem>(`/api/v1/items/${id}/tags/${tagId}`, { method: 'DELETE' }),
+    request<LibraryItem>(`/api/v1/items/${id}/tags/${tagId}`, { method: 'DELETE' }).then(invalidateTags),
+
+  // Cached - see tagsCache.
+  listTags: (): Promise<TagSummary[]> => {
+    if (!tagsCache) {
+      tagsCache = request<TagSummary[]>('/api/v1/tags').catch((err) => {
+        tagsCache = null;
+        throw err;
+      });
+    }
+    return tagsCache;
+  },
+
+  // Renames a tag on all the user's items (merging into an existing tag
+  // of that name) and returns the updated tag list.
+  renameTag: async (from: string, to: string): Promise<TagSummary[]> => {
+    const tags = await request<TagSummary[]>('/api/v1/tags/rename', {
+      method: 'POST',
+      body: JSON.stringify({ from, to }),
+    });
+    tagsCache = Promise.resolve(tags);
+    return tags;
+  },
 
   requestSync: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/sync`, { method: 'POST' }),
   cancelSync: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/sync`, { method: 'DELETE' }),

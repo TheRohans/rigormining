@@ -484,6 +484,90 @@ func (r *DataRepository) DetachTag(itemId string, tagId string) error {
 	return err
 }
 
+// ListTags returns the tags on a user's items, with item counts. Tag rows
+// are shared by all users (tag names are global), so this goes through
+// the user's items rather than listing the tag table.
+func (r *DataRepository) ListTags(userId string) ([]models.TagSummary, error) {
+	tags := make([]models.TagSummary, 0)
+	err := r.Db.Select(&tags, r.Db.Rebind(`
+		SELECT t.name AS name, COUNT(*) AS count
+		FROM tag t
+		JOIN item_tag it ON it.tag_uuid = t.uuid
+		JOIN library_item li ON li.uuid = it.item_uuid
+		WHERE li.user_uuid = ?
+		GROUP BY t.name
+		ORDER BY t.name
+	`), userId)
+	return tags, err
+}
+
+// ErrTagNotFound means the user has no items with the tag being renamed.
+var ErrTagNotFound = errors.New("tag not found")
+
+// RenameTag moves every one of userId's items from tag "from" to tag "to",
+// merging into "to" if it already exists, and returns how many items were
+// affected. It never renames the shared tag row itself - another user's
+// "music" must stay "music" - it re-points this user's links, then deletes
+// the old tag row if nobody uses it any more.
+func (r *DataRepository) RenameTag(userId, from, to string) (int, error) {
+	tx, err := r.Db.Beginx()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	var fromId string
+	if err := tx.Get(&fromId, tx.Rebind(`SELECT uuid FROM tag WHERE name = ?`), from); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrTagNotFound
+		}
+		return 0, err
+	}
+
+	// The user's items with the old tag.
+	var itemIds []string
+	if err := tx.Select(&itemIds, tx.Rebind(`
+		SELECT it.item_uuid FROM item_tag it
+		JOIN library_item li ON li.uuid = it.item_uuid
+		WHERE it.tag_uuid = ? AND li.user_uuid = ?
+	`), fromId, userId); err != nil {
+		return 0, err
+	}
+	if len(itemIds) == 0 {
+		return 0, ErrTagNotFound
+	}
+
+	if _, err := tx.Exec(tx.Rebind(`INSERT INTO tag (uuid, name) VALUES (?, ?) ON CONFLICT (name) DO NOTHING`),
+		uuid.New().String(), to); err != nil {
+		return 0, err
+	}
+	var toId string
+	if err := tx.Get(&toId, tx.Rebind(`SELECT uuid FROM tag WHERE name = ?`), to); err != nil {
+		return 0, err
+	}
+
+	for _, itemId := range itemIds {
+		// An item that already has both tags just loses the old one.
+		if _, err := tx.Exec(tx.Rebind(`INSERT INTO item_tag (item_uuid, tag_uuid) VALUES (?, ?) ON CONFLICT DO NOTHING`),
+			itemId, toId); err != nil {
+			return 0, err
+		}
+		if _, err := tx.Exec(tx.Rebind(`DELETE FROM item_tag WHERE item_uuid = ? AND tag_uuid = ?`),
+			itemId, fromId); err != nil {
+			return 0, err
+		}
+	}
+
+	if _, err := tx.Exec(tx.Rebind(`
+		DELETE FROM tag WHERE uuid = ?
+		AND NOT EXISTS (SELECT 1 FROM item_tag WHERE tag_uuid = ?)
+	`), fromId, fromId); err != nil {
+		return 0, err
+	}
+
+	return len(itemIds), tx.Commit()
+}
+
 func (r *DataRepository) GetTagsForItem(itemId string) ([]models.Tag, error) {
 	rows, err := r.getTagsForItemQuery.Queryx(itemId)
 	if err != nil {

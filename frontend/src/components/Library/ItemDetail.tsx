@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { ChevronLeftIcon, ExternalLinkIcon, XIcon } from '@heroicons/react/solid';
 import Navigation from '@components/App/Navigation';
-import { api, ItemMetadataInput, LibraryItem } from '../../api/client';
+import { api, ItemMetadataInput, LibraryItem, TagSummary } from '../../api/client';
 
 const label = 'block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1';
 const input =
@@ -37,6 +37,7 @@ export const ItemDetail: React.FC = () => {
 
   const [item, setItem] = useState<LibraryItem | null>(null);
   const [newTag, setNewTag] = useState('');
+  const [allTags, setAllTags] = useState<TagSummary[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -52,6 +53,17 @@ export const ItemDetail: React.FC = () => {
   useEffect(() => {
     load();
   }, [id]);
+
+  // Tag suggestions - api.listTags is cached, so this is one request per
+  // page load at most.
+  const loadTags = () => {
+    api
+      .listTags()
+      .then(setAllTags)
+      .catch(() => setAllTags([]));
+  };
+
+  useEffect(loadTags, []);
 
   if (!item) {
     return null;
@@ -153,11 +165,13 @@ export const ItemDetail: React.FC = () => {
     const updated = await api.addTag(item.id, newTag.trim());
     setItem(updated);
     setNewTag('');
+    loadTags();
   };
 
   const removeTag = async (tagId: string) => {
     const updated = await api.removeTag(item.id, tagId);
     setItem(updated);
+    loadTags();
   };
 
   const remove = async () => {
@@ -334,11 +348,21 @@ export const ItemDetail: React.FC = () => {
             <div className="flex gap-2">
               <input
                 className={`flex-1 ${input}`}
+                list="item-tag-suggestions"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTag()}
                 placeholder="add to a project"
               />
+              <datalist id="item-tag-suggestions">
+                {allTags
+                  .filter((t) => !item.tags.some((own) => own.name === t.name))
+                  .map((t) => (
+                    // No label text: Firefox shows an option's label in
+                    // place of its value, so a count label hid the name.
+                    <option key={t.name} value={t.name} />
+                  ))}
+              </datalist>
               <button
                 onClick={addTag}
                 className="px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"

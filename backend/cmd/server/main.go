@@ -150,6 +150,9 @@ func run() error {
 	api.HandleFunc("/items/{id}/sync", handlers.APICancelSync(e)).Methods("DELETE")
 	api.HandleFunc("/items/{id}/sync/ack", handlers.APIAckSync(e)).Methods("POST")
 
+	api.HandleFunc("/tags", handlers.APIListTags(e)).Methods("GET")
+	api.HandleFunc("/tags/rename", handlers.APIRenameTag(e)).Methods("POST")
+
 	api.HandleFunc("/tokens", handlers.APIListTokens(e)).Methods("GET")
 	api.HandleFunc("/tokens", handlers.APICreateToken(e)).Methods("POST")
 	api.HandleFunc("/tokens/{id}", handlers.APIDeleteToken(e)).Methods("DELETE")

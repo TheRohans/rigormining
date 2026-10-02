@@ -122,6 +122,12 @@ export const Library: React.FC = () => {
     loadItems();
   };
 
+  const renameTag = async (from: string, to: string) => {
+    await api.renameTag(from, to);
+    if (selectedTag === from) setSelectedTag(to);
+    loadItems();
+  };
+
   const addSelectedToProject = async () => {
     const name = newProjectName.trim();
     if (!name || selectedIds.size === 0) return;
@@ -156,7 +162,13 @@ export const Library: React.FC = () => {
           <Navigation loggedIn={true} />
 
           <div className="flex" style={{ height: 'calc(100vh - 4rem)' }}>
-            <TagTree items={items} selected={selectedTag} onSelect={setSelectedTag} onDropItem={addTagToItem} />
+            <TagTree
+              items={items}
+              selected={selectedTag}
+              onSelect={setSelectedTag}
+              onDropItem={addTagToItem}
+              onRenameTag={renameTag}
+            />
 
             <div ref={dropArea} className="flex-1 overflow-y-auto">
               <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
