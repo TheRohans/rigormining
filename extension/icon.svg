@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Placeholder pickaxe: drawn upright (handle down, head across the top), then tilted 45deg. -->
+  <g transform="translate(-4 4) rotate(45 64 64)" stroke-linejoin="round">
+    <rect x="57" y="36" width="14" height="86" rx="6" fill="#a0642c" stroke="#5c3714" stroke-width="4"/>
+    <path d="M10 46 Q64 2 118 46 Q64 30 10 46 Z" fill="#b8c0c8" stroke="#3d4650" stroke-width="5"/>
+    <rect x="53" y="28" width="22" height="20" rx="3" fill="#7d8790" stroke="#3d4650" stroke-width="4"/>
+  </g>
+</svg>

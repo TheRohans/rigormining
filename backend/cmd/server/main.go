@@ -119,6 +119,8 @@ func run() error {
 	router.HandleFunc("/login", auth.HandleLogin(e, oauthCfg)).Methods("GET")
 	router.HandleFunc("/callback", auth.HandleCallback(e, oauthCfg, repo)).Methods("GET")
 	router.HandleFunc("/dev-login", auth.HandleDevLogin(e, repo)).Methods("GET")
+	// Public: Firefox's background update check (gecko.update_url).
+	router.HandleFunc("/extension/firefox/{file}", handlers.FirefoxRelease(e)).Methods("GET")
 
 	secure := router.PathPrefix("/-/").Subrouter()
 	secure.Use(auth.LoginVerify(e, repo))

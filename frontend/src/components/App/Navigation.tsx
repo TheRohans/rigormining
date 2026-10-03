@@ -4,6 +4,7 @@ import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import { Link } from 'react-router-dom';
 
 import { api, logoutUrl, WhoAmI } from '../../api/client';
+import PickaxeIcon from '../../assets/pickaxe.svg';
 
 const navigation = [
   { name: 'Library', to: '/library', current: true },
@@ -61,10 +62,10 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
                   <Link to="/" className="flex items-center gap-2 text-white font-semibold tracking-tight">
                     {/* Placeholder icon until there's a real logo. */}
                     <span
-                      className="h-7 w-7 rounded-md bg-indigo-500 flex items-center justify-center text-base"
+                      className="h-7 w-7 rounded-md bg-indigo-500 flex items-center justify-center"
                       aria-hidden="true"
                     >
-                      ⛏️
+                      <PickaxeIcon className="h-6 w-6" />
                     </span>
                     <span className="hidden sm:inline">Rigor Mining</span>
                     {version && <span className="hidden sm:inline text-xs font-normal text-gray-400">v{version}</span>}

@@ -17,7 +17,7 @@ install: extension skills
 extension:
 	cd ../extension && $(MAKE) build
 	mkdir -p static/extension
-	cp ../extension/dist/*.zip static/extension/
+	cp ../extension/dist/* static/extension/
 
 # Zips downloadable agent skills (see ../.agents/skills/) and stages them
 # where RM_SKILLS_DIR (default ./static/skills) expects to find them - the

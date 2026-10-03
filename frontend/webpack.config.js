@@ -54,7 +54,14 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        use: ['@svgr/webpack'],
+        use: [
+          {
+            loader: '@svgr/webpack',
+            // svgo strips viewBox by default, which breaks sizing an icon
+            // with CSS (it just crops the drawing to the new box).
+            options: { svgoConfig: { plugins: [{ removeViewBox: false }] } },
+          },
+        ],
       },
       // This fixes a bunch of amplify errors
       {
