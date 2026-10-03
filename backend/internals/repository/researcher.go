@@ -354,9 +354,27 @@ func (r *DataRepository) UpdateItemFile(item *models.LibraryItem) error {
 	return err
 }
 
+// DeleteItem deletes an item and its tag/collection links. The links go
+// first, in the same transaction: Postgres enforces their foreign keys
+// (SQLite, by default, doesn't - it just left them orphaned).
 func (r *DataRepository) DeleteItem(itemId string, userId string) error {
-	_, err := r.deleteItemQuery.Exec(itemId, userId)
-	return err
+	tx, err := r.Db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Scoped to the owner's item, so these can't touch anyone else's links.
+	owned := `item_uuid IN (SELECT uuid FROM library_item WHERE uuid = ? AND user_uuid = ?)`
+	for _, table := range []string{"item_tag", "item_collection"} {
+		if _, err := tx.Exec(tx.Rebind("DELETE FROM "+table+" WHERE "+owned), itemId, userId); err != nil {
+			return err
+		}
+	}
+	if _, err := tx.Stmtx(r.deleteItemQuery).Exec(itemId, userId); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *DataRepository) GetItemById(itemId string) (*models.LibraryItem, error) {
@@ -415,6 +433,8 @@ type ItemFilter struct {
 	Tag       string // "" = any, else only items with exactly this tag
 }
 
+var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+
 // ListItems is intentionally not a prepared statement, since the WHERE
 // clause shape depends on which filters are set.
 func (r *DataRepository) ListItems(userId string, f ItemFilter) ([]models.LibraryItem, error) {
@@ -422,8 +442,11 @@ func (r *DataRepository) ListItems(userId string, f ItemFilter) ([]models.Librar
 	args := []interface{}{userId}
 
 	if f.Query != "" {
-		clauses = append(clauses, "(title LIKE ? OR authors LIKE ?)")
-		like := "%" + f.Query + "%"
+		// LOWER on both sides: SQLite's LIKE ignores case but Postgres's
+		// doesn't. The query's own % and _ are escaped so they match
+		// literally rather than as wildcards.
+		clauses = append(clauses, `(LOWER(title) LIKE ? ESCAPE '\' OR LOWER(authors) LIKE ? ESCAPE '\')`)
+		like := "%" + likeEscaper.Replace(strings.ToLower(f.Query)) + "%"
 		args = append(args, like, like)
 	}
 	if f.SyncState != "" {

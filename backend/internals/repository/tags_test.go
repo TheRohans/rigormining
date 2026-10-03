@@ -2,80 +2,11 @@ package repository
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 	"reflect"
-	"sort"
 	"testing"
-	"time"
-
-	"github.com/google/uuid"
-	_ "github.com/mattn/go-sqlite3"
 
 	"gitlab.com/robrohan/rigormining/internals/models"
 )
-
-// testRepo opens a fresh SQLite database with all migrations applied.
-func testRepo(t *testing.T) *DataRepository {
-	t.Helper()
-	dbPath := filepath.Join(t.TempDir(), "test.db")
-
-	// Migrations are read from ./migrations, relative to the backend root.
-	wd, _ := os.Getwd()
-	if err := os.Chdir("../.."); err != nil {
-		t.Fatal(err)
-	}
-	db, err := OpenDatabase("sqlite3", dbPath, "test")
-	os.Chdir(wd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return Attach("test", db, "sqlite3")
-}
-
-func testUser(t *testing.T, r *DataRepository, email string) string {
-	t.Helper()
-	if err := r.UpsertUser(models.NewUser(email, email, "")); err != nil {
-		t.Fatal(err)
-	}
-	u, err := r.GetUser(email)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return u.UUID
-}
-
-func testItem(t *testing.T, r *DataRepository, userId string, tags ...string) string {
-	t.Helper()
-	item := &models.LibraryItem{
-		UUID: uuid.New().String(), UserId: userId, Title: "paper",
-		AddedDate: time.Now().UTC().Format(time.RFC3339),
-	}
-	if err := r.CreateItem(item); err != nil {
-		t.Fatal(err)
-	}
-	for _, tag := range tags {
-		if err := r.AttachTag(item.UUID, tag); err != nil {
-			t.Fatal(err)
-		}
-	}
-	return item.UUID
-}
-
-func tagNames(t *testing.T, r *DataRepository, itemId string) []string {
-	t.Helper()
-	tags, err := r.GetTagsForItem(itemId)
-	if err != nil {
-		t.Fatal(err)
-	}
-	names := []string{}
-	for _, tag := range tags {
-		names = append(names, tag.Name)
-	}
-	sort.Strings(names)
-	return names
-}
 
 func TestRenameTag(t *testing.T) {
 	r := testRepo(t)

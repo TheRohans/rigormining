@@ -350,15 +350,17 @@ func APIDeleteItem(e *env.Env) http.HandlerFunc {
 		if item == nil {
 			return
 		}
-		if item.FilePath != nil {
-			if err := os.Remove(*item.FilePath); err != nil && !os.IsNotExist(err) {
-				e.Log.Error("could not remove item file", "error", err, "path", *item.FilePath)
-			}
-		}
+		// Database first: if that fails the item is still intact, rather than
+		// left pointing at a file that's already gone.
 		if err := e.Repo.DeleteItem(item.UUID, env.UserFromContext(r.Context()).UUID); err != nil {
 			e.Log.Error("DeleteItem failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not delete item")
 			return
+		}
+		if item.FilePath != nil {
+			if err := os.Remove(*item.FilePath); err != nil && !os.IsNotExist(err) {
+				e.Log.Error("could not remove item file", "error", err, "path", *item.FilePath)
+			}
 		}
 		w.WriteHeader(http.StatusNoContent)
 	}
