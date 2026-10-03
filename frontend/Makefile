@@ -1,6 +1,7 @@
 PHONY: clean build
 
-hash = $(shell git log --pretty=format:'%h' -n 1)
+# Comes from the root Makefile (see VERSION there).
+VERSION ?= $(shell $(MAKE) -s --no-print-directory -C .. version)
 
 RIGORMINING_VERSION=development
 
@@ -16,7 +17,7 @@ clean:
 make_dev_env:
 	@echo "" > .env
 	@echo "RIGORMINING_BUCKET=http://localhost:8000" >> .env
-	@echo "RIGORMINING_VERSION=$(hash)" >> .env
+	@echo "RIGORMINING_VERSION=$(VERSION)" >> .env
 	@echo "RIGORMINING_API_BASE=http://localhost:3000" >> .env
 	@echo "RIGORMINING_DEV_LOGIN=true" >> .env
 	@echo "" >> .env
@@ -24,7 +25,7 @@ make_dev_env:
 make_prod_env:
 	@echo "" > .env
 	@echo "RIGORMINING_BUCKET=https://rigormining.com" >> .env
-	@echo "RIGORMINING_VERSION=$(hash)" >> .env
+	@echo "RIGORMINING_VERSION=$(VERSION)" >> .env
 	@echo "" >> .env
 
 copy_worker:

@@ -12,6 +12,8 @@ const navigation = [
   { name: 'Settings', to: '/settings', current: true },
 ];
 
+const version = process.env.RIGORMINING_VERSION;
+
 const classNames = (...classes: any) => {
   return classes.filter(Boolean).join(' ');
 };
@@ -65,6 +67,7 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
                       ⛏️
                     </span>
                     <span className="hidden sm:inline">Rigor Mining</span>
+                    {version && <span className="hidden sm:inline text-xs font-normal text-gray-400">v{version}</span>}
                   </Link>
                 </div>
                 <div className="hidden sm:block sm:ml-6">

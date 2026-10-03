@@ -2,11 +2,14 @@
   "manifest_version": 3,
   "name": "Rigor Mining Capture",
   "version": "0.2.1",
-  "description": "Capture papers and books from the web into your self-hosted Rigor Mining library.",
+  "description": "Capture PDFs and EPUBs from the web into your Rigor Mining library.",
   "action": {
     "default_popup": "popup.html"
   },
-  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
   "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -22,7 +25,7 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "capture@rigormining.local"
+      "id": "rigormining@therohans.com"
     }
   }
 }

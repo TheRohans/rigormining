@@ -1,15 +1,23 @@
-.PHONY: list install test docker_build docker_push docker_run clean
+.PHONY: version list install test docker_build docker_push docker_run clean
 
-HASH=$(shell git log --pretty=format:'%h' -n 1)
+# The one version for everything: extension zips (Chrome and Firefox),
+# the web header, the backend's build var and the docker tag. Bump the
+# major.minor here by hand; the patch is the commit count, so it only ever
+# goes up (AMO rejects re-signing a version). Sub-Makefiles ask for it via
+# `make -s version`.
+VERSION=0.2.$(shell git rev-list --count HEAD 2>/dev/null || echo 0)
 
 include .env
 export
 
 DOCKER_CONTAINER=$(REPOSITORY)/$(PROJECT)
 
+version:
+	@echo $(VERSION)
+
 # List all targets in this file
 list:
-	@echo $(HASH)
+	@echo $(VERSION)
 	@echo ""
 	@grep -B 1 '^[^#[:space:]].*:' Makefile
 
@@ -26,21 +34,21 @@ clean:
 # Build context is the repo root - see Dockerfile.
 docker_build:
 	docker buildx build --platform linux/amd64 \
-		--build-arg VERSION=$(HASH) \
-		-t $(DOCKER_CONTAINER):$(HASH) .
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_CONTAINER):$(VERSION) .
 
 docker_push:
-	docker push $(DOCKER_CONTAINER):$(HASH)
+	docker push $(DOCKER_CONTAINER):$(VERSION)
 
 # Quick local smoke test of the built image - datastore/ isn't mounted
 # here, so it just uses the container's local disk (see Dockerfile).
 # backend/.env.production is your own gitignored copy of
 # backend/.env.template with real (non-dev-login) values.
 docker_run:
-	docker run --env-file=backend/.env.production -p 8080:3000 $(DOCKER_CONTAINER):$(HASH)
+	docker run --env-file=backend/.env.production -p 8080:3000 $(DOCKER_CONTAINER):$(VERSION)
 
 # Deploying past this point is manual:
-#   1. `make docker_build docker_push` to get $(DOCKER_CONTAINER):$(HASH)
+#   1. `make docker_build docker_push` to get $(DOCKER_CONTAINER):$(VERSION)
 #      onto Docker Hub.
 #   2. Cloud Run console -> the service -> Edit & Deploy New Revision ->
 #      Container image URL -> point it at that tag.

@@ -7,10 +7,10 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
 COPY frontend/ ./
-ARG VERSION=docker
+ARG VERSION=0.0.0
 # Mirrors frontend/Makefile's make_prod_env target, without needing a git
 # checkout in the build context - VERSION is passed in as a build arg
-# instead (see Makefile's docker_build: --build-arg VERSION=$(HASH)).
+# instead (see Makefile's docker_build: --build-arg VERSION=$(VERSION)).
 RUN printf 'RIGORMINING_BUCKET=https://rigormining.com\nRIGORMINING_VERSION=%s\n' "$VERSION" > .env \
     && npm run build \
     && cp node_modules/pdfjs-dist/build/pdf.worker.js dist/pdf.worker.js
@@ -20,7 +20,9 @@ FROM alpine:3 AS extension-builder
 WORKDIR /app/extension
 RUN apk add --no-cache zip make
 COPY extension/ ./
-RUN make build
+ARG VERSION=0.0.0
+# No root Makefile or .git in here, so the version comes in from the host.
+RUN make build VERSION=$VERSION
 
 # --- skills: zip downloadable agent skills for the "Get Extension" page ---
 FROM alpine:3 AS skills-builder
@@ -33,7 +35,7 @@ RUN zip -r -q kobo-sync.zip kobo-sync
 FROM golang:1.25 AS backend-builder
 WORKDIR /go/src/gitlab.com/robrohan/rigormining
 COPY backend/ ./
-ARG VERSION=docker
+ARG VERSION=0.0.0
 # CGO must stay on - go-sqlite3 needs it.
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
     go build -o rigormining-server -ldflags "-X main.build=${VERSION}" cmd/server/main.go

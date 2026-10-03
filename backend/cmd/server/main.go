@@ -28,7 +28,7 @@ import (
 	"gitlab.com/robrohan/rigormining/internals/repository"
 )
 
-// will be replaced with git hash at build time
+// replaced with the root Makefile's VERSION at build time
 var build = "develop"
 
 func main() {

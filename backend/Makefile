@@ -3,6 +3,9 @@ PHONY: install start build test test-postgres extension skills
 include .env
 export
 
+# Comes from the root Makefile (see VERSION there).
+VERSION ?= $(shell $(MAKE) -s --no-print-directory -C .. version)
+
 install: extension skills
 	go mod tidy
 	cp -n .env.template .env || true
@@ -26,10 +29,10 @@ skills:
 	mv ../.agents/skills/kobo-sync.zip static/skills/kobo-sync.zip
 
 start:
-	go run cmd/server/main.go
+	go run -ldflags "-X main.build=$(VERSION)" cmd/server/main.go
 
 build:
-	go build -o rigormining-server cmd/server/main.go
+	go build -o rigormining-server -ldflags "-X main.build=$(VERSION)" cmd/server/main.go
 
 test:
 	go test ./...

@@ -11,7 +11,7 @@
 		{"id":"b82b79cfb6a165ac","type":"text","text":"# Stitch\nhttps://github.com/robrohan/stitch","x":648,"y":-471,"width":217,"height":73},
 		{"id":"dfda7d647ce85985","type":"text","text":"# Chrome\nFirefox can not sync to USB connected devices. Only Chrome based \nbrowsers can do that","x":1255,"y":-499,"width":254,"height":116,"color":"3"},
 		{"id":"f1fd146c9e21fdd5","type":"text","text":"# Zotero Import Tool\nI was using Zotero, and I wanted to move all my papers over\n[[../backend/cmd/import-zotero]]","x":1245,"y":-58,"width":267,"height":123,"color":"3"},
-		{"id":"85079d6ef44f7838","type":"text","text":"# Local Disk","x":1560,"y":-26,"width":131,"height":60,"color":"3"}
+		{"id":"85079d6ef44f7838","type":"text","text":"# Local Disk","x":1559,"y":-27,"width":131,"height":60,"color":"3"}
 	],
 	"edges":[
 		{"id":"1a13e82a841e6fdf","fromNode":"9824d6c9cc0b7323","fromSide":"top","toNode":"24a5c8e1ca8c02a6","toSide":"bottom"},
