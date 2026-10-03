@@ -186,10 +186,16 @@ func APICreateItem(e *env.Env) http.HandlerFunc {
 			return
 		}
 
+		autofill := startAutofill(e, &item, true)
+		pending := autofill.applyNow(e, &item)
+
 		if err := e.Repo.CreateItem(&item); err != nil {
 			e.Log.Error("CreateItem failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not create item")
 			return
+		}
+		if pending {
+			autofill.finishInBackground(e, item.UUID, item.UserId)
 		}
 
 		for _, tag := range meta.Tags {
@@ -344,15 +350,17 @@ func APIDeleteItem(e *env.Env) http.HandlerFunc {
 		if item == nil {
 			return
 		}
-		if item.FilePath != nil {
-			if err := os.Remove(*item.FilePath); err != nil && !os.IsNotExist(err) {
-				e.Log.Error("could not remove item file", "error", err, "path", *item.FilePath)
-			}
-		}
+		// Database first: if that fails the item is still intact, rather than
+		// left pointing at a file that's already gone.
 		if err := e.Repo.DeleteItem(item.UUID, env.UserFromContext(r.Context()).UUID); err != nil {
 			e.Log.Error("DeleteItem failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not delete item")
 			return
+		}
+		if item.FilePath != nil {
+			if err := os.Remove(*item.FilePath); err != nil && !os.IsNotExist(err) {
+				e.Log.Error("could not remove item file", "error", err, "path", *item.FilePath)
+			}
 		}
 		w.WriteHeader(http.StatusNoContent)
 	}
@@ -520,10 +528,23 @@ func APIUploadItemFile(e *env.Env) http.HandlerFunc {
 			return
 		}
 
+		autofill := startAutofill(e, item, true)
+		pending := autofill.applyNow(e, item)
+
 		if err := e.Repo.UpdateItemFile(item); err != nil {
 			e.Log.Error("UpdateItemFile failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not save file reference")
 			return
+		}
+		// UpdateItemFile only writes the file columns; the title taken from
+		// the PDF and any looked-up fields need saving too.
+		if err := e.Repo.UpdateItem(item); err != nil {
+			e.Log.Error("UpdateItem failed", "error", err)
+			writeError(w, http.StatusInternalServerError, "could not save item metadata")
+			return
+		}
+		if pending {
+			autofill.finishInBackground(e, item.UUID, item.UserId)
 		}
 
 		if oldPath != nil && *oldPath != *item.FilePath {

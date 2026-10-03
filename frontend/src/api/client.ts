@@ -89,6 +89,27 @@ export type ItemMetadataInput = {
   publisher?: string;
 };
 
+export type CitationLookup = {
+  source: 'crossref' | 'datacite' | 'arxiv' | 'openlibrary';
+  matched_by: string;
+  metadata: ItemMetadataInput;
+};
+
+export type TagSummary = {
+  name: string;
+  count: number;
+};
+
+// The user's tag list, fetched once and shared by every component that
+// wants it (tag autocomplete). Dropped whenever tags change, so the next
+// listTags() refetches.
+let tagsCache: Promise<TagSummary[]> | null = null;
+
+const invalidateTags = <T>(result: T): T => {
+  tagsCache = null;
+  return result;
+};
+
 export const api = {
   whoami: () => request<WhoAmI>('/api/v1/whoami'),
 
@@ -120,11 +141,39 @@ export const api = {
 
   deleteItem: (id: string) => request<void>(`/api/v1/items/${id}`, { method: 'DELETE' }),
 
+  // Looks up the item's citation (Crossref/arXiv/Open Library) without
+  // saving anything.
+  lookupCitation: (id: string) => request<CitationLookup>(`/api/v1/items/${id}/citation`),
+
   addTag: (id: string, name: string) =>
-    request<LibraryItem>(`/api/v1/items/${id}/tags`, { method: 'POST', body: JSON.stringify({ name }) }),
+    request<LibraryItem>(`/api/v1/items/${id}/tags`, { method: 'POST', body: JSON.stringify({ name }) }).then(
+      invalidateTags,
+    ),
 
   removeTag: (id: string, tagId: string) =>
-    request<LibraryItem>(`/api/v1/items/${id}/tags/${tagId}`, { method: 'DELETE' }),
+    request<LibraryItem>(`/api/v1/items/${id}/tags/${tagId}`, { method: 'DELETE' }).then(invalidateTags),
+
+  // Cached - see tagsCache.
+  listTags: (): Promise<TagSummary[]> => {
+    if (!tagsCache) {
+      tagsCache = request<TagSummary[]>('/api/v1/tags').catch((err) => {
+        tagsCache = null;
+        throw err;
+      });
+    }
+    return tagsCache;
+  },
+
+  // Renames a tag on all the user's items (merging into an existing tag
+  // of that name) and returns the updated tag list.
+  renameTag: async (from: string, to: string): Promise<TagSummary[]> => {
+    const tags = await request<TagSummary[]>('/api/v1/tags/rename', {
+      method: 'POST',
+      body: JSON.stringify({ from, to }),
+    });
+    tagsCache = Promise.resolve(tags);
+    return tags;
+  },
 
   requestSync: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/sync`, { method: 'POST' }),
   cancelSync: (id: string) => request<LibraryItem>(`/api/v1/items/${id}/sync`, { method: 'DELETE' }),
@@ -139,6 +188,7 @@ export const api = {
   fileUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/file`,
   exportUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/export.md`,
   bibtexUrl: (id: string) => `${API_BASE}/api/v1/items/${id}/export.bib`,
+  tagBibtexUrl: (tag: string) => `${API_BASE}/api/v1/items/export.bib?tag=${encodeURIComponent(tag)}`,
   extensionUrl: (browser: 'chrome' | 'firefox') => `${API_BASE}/api/v1/extension/${browser}`,
   skillUrl: (name: string) => `${API_BASE}/api/v1/skills/${name}`,
 

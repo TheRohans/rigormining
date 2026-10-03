@@ -122,6 +122,12 @@ export const Library: React.FC = () => {
     loadItems();
   };
 
+  const renameTag = async (from: string, to: string) => {
+    await api.renameTag(from, to);
+    if (selectedTag === from) setSelectedTag(to);
+    loadItems();
+  };
+
   const addSelectedToProject = async () => {
     const name = newProjectName.trim();
     if (!name || selectedIds.size === 0) return;
@@ -156,7 +162,13 @@ export const Library: React.FC = () => {
           <Navigation loggedIn={true} />
 
           <div className="flex" style={{ height: 'calc(100vh - 4rem)' }}>
-            <TagTree items={items} selected={selectedTag} onSelect={setSelectedTag} onDropItem={addTagToItem} />
+            <TagTree
+              items={items}
+              selected={selectedTag}
+              onSelect={setSelectedTag}
+              onDropItem={addTagToItem}
+              onRenameTag={renameTag}
+            />
 
             <div ref={dropArea} className="flex-1 overflow-y-auto">
               <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -187,8 +199,22 @@ export const Library: React.FC = () => {
                     />
                   </div>
 
+                  {selectedTag !== null && selectedTag !== UNTAGGED && (
+                    <a
+                      href={api.tagBibtexUrl(selectedTag)}
+                      className="ml-auto px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 whitespace-nowrap"
+                      title={`Download every item tagged "${selectedTag}" as one .bib file`}
+                    >
+                      Export to BibTeX
+                    </a>
+                  )}
+
                   {selectedIds.size > 0 && (
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div
+                      className={`flex items-center gap-2 ${
+                        selectedTag !== null && selectedTag !== UNTAGGED ? '' : 'ml-auto'
+                      }`}
+                    >
                       <span className="text-xs text-gray-500">{selectedIds.size} selected</span>
                       <input
                         list="rigormining-project-names"

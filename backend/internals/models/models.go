@@ -82,3 +82,9 @@ type Tag struct {
 	UUID string `db:"uuid" json:"id"`
 	Name string `db:"name" json:"name"`
 }
+
+// TagSummary is one of a user's tags and how many of their items have it.
+type TagSummary struct {
+	Name  string `db:"name"  json:"name"`
+	Count int    `db:"count" json:"count"`
+}

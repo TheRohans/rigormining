@@ -193,10 +193,18 @@ func APICapture(e *env.Env) http.HandlerFunc {
 			return
 		}
 
+		// Fills whatever the page's citation tags didn't provide - also
+		// for captures with no PDF, as long as the page gave a DOI.
+		autofill := startAutofill(e, &item, preferExtractedTitle)
+		pending := autofill.applyNow(e, &item)
+
 		if err := e.Repo.CreateItem(&item); err != nil {
 			e.Log.Error("CreateItem (capture) failed", "error", err)
 			writeError(w, http.StatusInternalServerError, "could not create item")
 			return
+		}
+		if pending {
+			autofill.finishInBackground(e, item.UUID, item.UserId)
 		}
 
 		writeJSON(w, http.StatusCreated, itemResponse(e, &item))

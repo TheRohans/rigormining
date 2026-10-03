@@ -57,10 +57,14 @@ export const Navigation: React.FC<NavProps> = ({ loggedIn }) => {
               <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex-shrink-0 flex items-center">
                   <Link to="/" className="flex items-center gap-2 text-white font-semibold tracking-tight">
-                    <span className="h-7 w-7 rounded-md bg-indigo-500 flex items-center justify-center text-sm font-bold">
-                      R
+                    {/* Placeholder icon until there's a real logo. */}
+                    <span
+                      className="h-7 w-7 rounded-md bg-indigo-500 flex items-center justify-center text-base"
+                      aria-hidden="true"
+                    >
+                      ⛏️
                     </span>
-                    <span className="hidden sm:inline">rigormining</span>
+                    <span className="hidden sm:inline">Rigor Mining</span>
                   </Link>
                 </div>
                 <div className="hidden sm:block sm:ml-6">

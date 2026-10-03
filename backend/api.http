@@ -1,0 +1,241 @@
+# Rigor Mining API - every endpoint, for the VS Code "REST Client"
+# extension (humao.rest-client). Click "Send Request" above any request.
+#
+# Setup:
+#   1. Create an API token in the app (Get Extension page -> tokens), or
+#      with "Create a token" below once you have one.
+#   2. Put it in backend/.env (gitignored) as:  RM_API_TOKEN=<token>
+#      or paste it straight into @token below - but don't commit that.
+#
+# Requests marked "# @name" save their response, and later requests reuse
+# it: send "Create an item" first and the {{itemId}} requests below work
+# on that item. To use an existing item instead, replace @itemId with its id.
+
+@baseUrl = http://localhost:3000
+@api = {{baseUrl}}/api/v1
+@token = {{$dotenv RM_API_TOKEN}}
+
+@itemId = {{createItem.response.body.$.id}}
+@tag = Music
+
+
+#############################################################################
+# Account
+#############################################################################
+
+### Who am I - checks the token works
+GET {{api}}/whoami
+Authorization: Bearer {{token}}
+
+
+#############################################################################
+# Items
+#############################################################################
+
+### List items
+GET {{api}}/items
+Authorization: Bearer {{token}}
+
+### Search items by title/author
+GET {{api}}/items?q=learning
+Authorization: Bearer {{token}}
+
+### List items by sync state (request_sync, synced, request_remove)
+GET {{api}}/items?sync_state=request_sync
+Authorization: Bearer {{token}}
+
+### Create an item (metadata only - the "bookmark now, attach later" path)
+# @name createItem
+POST {{api}}/items
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=RMBoundary
+
+--RMBoundary
+Content-Disposition: form-data; name="metadata"
+
+{"title": "Attention Is All You Need", "authors": "Vaswani, Ashish; Shazeer, Noam", "year": 2017, "doi": "10.48550/arXiv.1706.03762", "tags": ["{{tag}}"]}
+--RMBoundary--
+
+### Create an item with a PDF
+# The PDF's title/DOI/authors are looked up automatically. The path is
+# relative to this file - point it at any PDF you have.
+POST {{api}}/items
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=RMBoundary
+
+--RMBoundary
+Content-Disposition: form-data; name="metadata"
+
+{"title": "main"}
+--RMBoundary
+Content-Disposition: form-data; name="file"; filename="main.pdf"
+Content-Type: application/pdf
+
+< ./sample.pdf
+--RMBoundary--
+
+### Capture a web page (what the browser extension sends)
+# "meta" is the page's <meta> tags as a JSON array; a "file" part with the
+# PDF is optional, as above.
+POST {{api}}/capture
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=RMBoundary
+
+--RMBoundary
+Content-Disposition: form-data; name="url"
+
+https://www.nature.com/articles/nature14539
+--RMBoundary
+Content-Disposition: form-data; name="title"
+
+Deep learning | Nature
+--RMBoundary
+Content-Disposition: form-data; name="meta"
+
+[{"name": "citation_doi", "content": "10.1038/nature14539"}, {"name": "citation_title", "content": "Deep learning"}]
+--RMBoundary--
+
+### Get an item
+GET {{api}}/items/{{itemId}}
+Authorization: Bearer {{token}}
+
+### Update an item's metadata
+# Replaces every field below - send them all, not just the changed ones.
+PATCH {{api}}/items/{{itemId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Attention Is All You Need",
+  "authors": "Vaswani, Ashish; Shazeer, Noam; Parmar, Niki",
+  "doi": "10.48550/arXiv.1706.03762",
+  "isbn": "",
+  "year": 2017,
+  "source_url": "https://arxiv.org/abs/1706.03762",
+  "notes": "",
+  "item_type": "preprint",
+  "venue": "arXiv preprint arXiv:1706.03762",
+  "volume": "",
+  "number": "",
+  "pages": "",
+  "publisher": "arXiv"
+}
+
+### Look up an item's citation (Crossref/DataCite/arXiv/Open Library)
+# Returns what it found; saves nothing.
+GET {{api}}/items/{{itemId}}/citation
+Authorization: Bearer {{token}}
+
+### Attach (or replace) an item's file
+POST {{api}}/items/{{itemId}}/file
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=RMBoundary
+
+--RMBoundary
+Content-Disposition: form-data; name="file"; filename="paper.pdf"
+Content-Type: application/pdf
+
+< ./sample.pdf
+--RMBoundary--
+
+### Download an item's file
+GET {{api}}/items/{{itemId}}/file
+Authorization: Bearer {{token}}
+
+### Export an item as Markdown
+GET {{api}}/items/{{itemId}}/export.md
+Authorization: Bearer {{token}}
+
+### Export an item as BibTeX
+GET {{api}}/items/{{itemId}}/export.bib
+Authorization: Bearer {{token}}
+
+### Delete an item
+DELETE {{api}}/items/{{itemId}}
+Authorization: Bearer {{token}}
+
+
+#############################################################################
+# Tags
+#############################################################################
+
+### List your tags with item counts
+GET {{api}}/tags
+Authorization: Bearer {{token}}
+
+### Add a tag to an item
+# @name addTag
+POST {{api}}/items/{{itemId}}/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"name": "{{tag}}"}
+
+### Remove a tag from an item (the first tag on it, from "Add a tag")
+DELETE {{api}}/items/{{itemId}}/tags/{{addTag.response.body.$.tags[0].id}}
+Authorization: Bearer {{token}}
+
+### Rename a tag on all your items (merges if "to" already exists)
+POST {{api}}/tags/rename
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"from": "{{tag}}", "to": "music"}
+
+### Export every item with a tag as one BibTeX file
+GET {{api}}/items/export.bib?tag={{tag}}
+Authorization: Bearer {{token}}
+
+
+#############################################################################
+# E-reader sync (what the kobo-sync skill uses)
+#############################################################################
+
+### Queue an item to copy to the device (or cancel a pending removal)
+POST {{api}}/items/{{itemId}}/sync
+Authorization: Bearer {{token}}
+
+### Unqueue / queue removal from the device
+DELETE {{api}}/items/{{itemId}}/sync
+Authorization: Bearer {{token}}
+
+### Report the result of a sync: "synced" or "removed"
+POST {{api}}/items/{{itemId}}/sync/ack
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"result": "synced"}
+
+
+#############################################################################
+# API tokens
+#############################################################################
+
+### List tokens (values are never shown again after creation)
+GET {{api}}/tokens
+Authorization: Bearer {{token}}
+
+### Create a token - the response is the only time its value is shown
+# @name createToken
+POST {{api}}/tokens
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"name": "rest-client test"}
+
+### Delete the token created above
+DELETE {{api}}/tokens/{{createToken.response.body.$.id}}
+Authorization: Bearer {{token}}
+
+
+#############################################################################
+# Downloads
+#############################################################################
+
+### Browser extension zip (chrome or firefox)
+GET {{api}}/extension/firefox
+Authorization: Bearer {{token}}
+
+### Agent skill zip (kobo-sync)
+GET {{api}}/skills/kobo-sync
+Authorization: Bearer {{token}}

@@ -354,9 +354,27 @@ func (r *DataRepository) UpdateItemFile(item *models.LibraryItem) error {
 	return err
 }
 
+// DeleteItem deletes an item and its tag/collection links. The links go
+// first, in the same transaction: Postgres enforces their foreign keys
+// (SQLite, by default, doesn't - it just left them orphaned).
 func (r *DataRepository) DeleteItem(itemId string, userId string) error {
-	_, err := r.deleteItemQuery.Exec(itemId, userId)
-	return err
+	tx, err := r.Db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Scoped to the owner's item, so these can't touch anyone else's links.
+	owned := `item_uuid IN (SELECT uuid FROM library_item WHERE uuid = ? AND user_uuid = ?)`
+	for _, table := range []string{"item_tag", "item_collection"} {
+		if _, err := tx.Exec(tx.Rebind("DELETE FROM "+table+" WHERE "+owned), itemId, userId); err != nil {
+			return err
+		}
+	}
+	if _, err := tx.Stmtx(r.deleteItemQuery).Exec(itemId, userId); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *DataRepository) GetItemById(itemId string) (*models.LibraryItem, error) {
@@ -412,7 +430,10 @@ func (r *DataRepository) SetItemSyncState(itemId string, userId string, state *s
 type ItemFilter struct {
 	Query     string
 	SyncState string // "" = any, else one of the models.SyncState* constants
+	Tag       string // "" = any, else only items with exactly this tag
 }
+
+var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 
 // ListItems is intentionally not a prepared statement, since the WHERE
 // clause shape depends on which filters are set.
@@ -421,13 +442,23 @@ func (r *DataRepository) ListItems(userId string, f ItemFilter) ([]models.Librar
 	args := []interface{}{userId}
 
 	if f.Query != "" {
-		clauses = append(clauses, "(title LIKE ? OR authors LIKE ?)")
-		like := "%" + f.Query + "%"
+		// LOWER on both sides: SQLite's LIKE ignores case but Postgres's
+		// doesn't. The query's own % and _ are escaped so they match
+		// literally rather than as wildcards.
+		clauses = append(clauses, `(LOWER(title) LIKE ? ESCAPE '\' OR LOWER(authors) LIKE ? ESCAPE '\')`)
+		like := "%" + likeEscaper.Replace(strings.ToLower(f.Query)) + "%"
 		args = append(args, like, like)
 	}
 	if f.SyncState != "" {
 		clauses = append(clauses, "sync_state = ?")
 		args = append(args, f.SyncState)
+	}
+	if f.Tag != "" {
+		clauses = append(clauses, `uuid IN (
+			SELECT it.item_uuid FROM item_tag it
+			JOIN tag t ON t.uuid = it.tag_uuid
+			WHERE t.name = ?)`)
+		args = append(args, f.Tag)
 	}
 
 	query := fmt.Sprintf(
@@ -474,6 +505,90 @@ func (r *DataRepository) AttachTag(itemId string, tagName string) error {
 func (r *DataRepository) DetachTag(itemId string, tagId string) error {
 	_, err := r.detachTagQuery.Exec(itemId, tagId)
 	return err
+}
+
+// ListTags returns the tags on a user's items, with item counts. Tag rows
+// are shared by all users (tag names are global), so this goes through
+// the user's items rather than listing the tag table.
+func (r *DataRepository) ListTags(userId string) ([]models.TagSummary, error) {
+	tags := make([]models.TagSummary, 0)
+	err := r.Db.Select(&tags, r.Db.Rebind(`
+		SELECT t.name AS name, COUNT(*) AS count
+		FROM tag t
+		JOIN item_tag it ON it.tag_uuid = t.uuid
+		JOIN library_item li ON li.uuid = it.item_uuid
+		WHERE li.user_uuid = ?
+		GROUP BY t.name
+		ORDER BY t.name
+	`), userId)
+	return tags, err
+}
+
+// ErrTagNotFound means the user has no items with the tag being renamed.
+var ErrTagNotFound = errors.New("tag not found")
+
+// RenameTag moves every one of userId's items from tag "from" to tag "to",
+// merging into "to" if it already exists, and returns how many items were
+// affected. It never renames the shared tag row itself - another user's
+// "music" must stay "music" - it re-points this user's links, then deletes
+// the old tag row if nobody uses it any more.
+func (r *DataRepository) RenameTag(userId, from, to string) (int, error) {
+	tx, err := r.Db.Beginx()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	var fromId string
+	if err := tx.Get(&fromId, tx.Rebind(`SELECT uuid FROM tag WHERE name = ?`), from); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrTagNotFound
+		}
+		return 0, err
+	}
+
+	// The user's items with the old tag.
+	var itemIds []string
+	if err := tx.Select(&itemIds, tx.Rebind(`
+		SELECT it.item_uuid FROM item_tag it
+		JOIN library_item li ON li.uuid = it.item_uuid
+		WHERE it.tag_uuid = ? AND li.user_uuid = ?
+	`), fromId, userId); err != nil {
+		return 0, err
+	}
+	if len(itemIds) == 0 {
+		return 0, ErrTagNotFound
+	}
+
+	if _, err := tx.Exec(tx.Rebind(`INSERT INTO tag (uuid, name) VALUES (?, ?) ON CONFLICT (name) DO NOTHING`),
+		uuid.New().String(), to); err != nil {
+		return 0, err
+	}
+	var toId string
+	if err := tx.Get(&toId, tx.Rebind(`SELECT uuid FROM tag WHERE name = ?`), to); err != nil {
+		return 0, err
+	}
+
+	for _, itemId := range itemIds {
+		// An item that already has both tags just loses the old one.
+		if _, err := tx.Exec(tx.Rebind(`INSERT INTO item_tag (item_uuid, tag_uuid) VALUES (?, ?) ON CONFLICT DO NOTHING`),
+			itemId, toId); err != nil {
+			return 0, err
+		}
+		if _, err := tx.Exec(tx.Rebind(`DELETE FROM item_tag WHERE item_uuid = ? AND tag_uuid = ?`),
+			itemId, fromId); err != nil {
+			return 0, err
+		}
+	}
+
+	if _, err := tx.Exec(tx.Rebind(`
+		DELETE FROM tag WHERE uuid = ?
+		AND NOT EXISTS (SELECT 1 FROM item_tag WHERE tag_uuid = ?)
+	`), fromId, fromId); err != nil {
+		return 0, err
+	}
+
+	return len(itemIds), tx.Commit()
 }
 
 func (r *DataRepository) GetTagsForItem(itemId string) ([]models.Tag, error) {

@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/ardanlabs/conf"
 	ghandlers "github.com/gorilla/handlers"
@@ -20,6 +21,7 @@ import (
 	"github.com/pkg/errors"
 
 	"gitlab.com/robrohan/rigormining/internals/auth"
+	"gitlab.com/robrohan/rigormining/internals/citation"
 	"gitlab.com/robrohan/rigormining/internals/env"
 	"gitlab.com/robrohan/rigormining/internals/handlers"
 	"gitlab.com/robrohan/rigormining/internals/models"
@@ -110,6 +112,9 @@ func run() error {
 		Router: router,
 		Repo:   repo,
 	}
+	if cfg.Lookup.Enabled {
+		e.Citation = citation.NewClient(&http.Client{Timeout: 10 * time.Second}, cfg.Lookup.Mailto)
+	}
 
 	router.HandleFunc("/login", auth.HandleLogin(e, oauthCfg)).Methods("GET")
 	router.HandleFunc("/callback", auth.HandleCallback(e, oauthCfg, repo)).Methods("GET")
@@ -129,6 +134,8 @@ func run() error {
 	api.HandleFunc("/items", handlers.APIGetItems(e)).Methods("GET")
 	api.HandleFunc("/items", handlers.APICreateItem(e)).Methods("POST")
 	api.HandleFunc("/capture", handlers.APICapture(e)).Methods("POST")
+	// Before /items/{id}, which would otherwise match "export.bib" as an id.
+	api.HandleFunc("/items/export.bib", handlers.APIExportBibtexTag(e)).Methods("GET")
 	api.HandleFunc("/items/{id}", handlers.APIGetItem(e)).Methods("GET")
 	api.HandleFunc("/items/{id}", handlers.APIUpdateItem(e)).Methods("PATCH")
 	api.HandleFunc("/items/{id}", handlers.APIDeleteItem(e)).Methods("DELETE")
@@ -136,11 +143,15 @@ func run() error {
 	api.HandleFunc("/items/{id}/file", handlers.APIUploadItemFile(e)).Methods("POST")
 	api.HandleFunc("/items/{id}/export.md", handlers.APIExportMarkdown(e)).Methods("GET")
 	api.HandleFunc("/items/{id}/export.bib", handlers.APIExportBibtex(e)).Methods("GET")
+	api.HandleFunc("/items/{id}/citation", handlers.APILookupCitation(e)).Methods("GET")
 	api.HandleFunc("/items/{id}/tags", handlers.APIAddItemTag(e)).Methods("POST")
 	api.HandleFunc("/items/{id}/tags/{tagId}", handlers.APIRemoveItemTag(e)).Methods("DELETE")
 	api.HandleFunc("/items/{id}/sync", handlers.APIRequestSync(e)).Methods("POST")
 	api.HandleFunc("/items/{id}/sync", handlers.APICancelSync(e)).Methods("DELETE")
 	api.HandleFunc("/items/{id}/sync/ack", handlers.APIAckSync(e)).Methods("POST")
+
+	api.HandleFunc("/tags", handlers.APIListTags(e)).Methods("GET")
+	api.HandleFunc("/tags/rename", handlers.APIRenameTag(e)).Methods("POST")
 
 	api.HandleFunc("/tokens", handlers.APIListTokens(e)).Methods("GET")
 	api.HandleFunc("/tokens", handlers.APICreateToken(e)).Methods("POST")
