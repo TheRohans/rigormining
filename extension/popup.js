@@ -21,11 +21,15 @@ button.addEventListener('click', async () => {
     if (!response.ok) {
       statusEl.style.color = '#b91c1c';
       if (response.error && response.error.includes('options')) {
-        statusEl.innerHTML = `${response.error} <a href="#" id="open-options">Open options</a>`;
-        document.getElementById('open-options').addEventListener('click', (e) => {
+        statusEl.textContent = `${response.error} `;
+        const optionsLink = document.createElement('a');
+        optionsLink.href = '#';
+        optionsLink.textContent = 'Open options';
+        optionsLink.addEventListener('click', (e) => {
           e.preventDefault();
           chrome.runtime.openOptionsPage();
         });
+        statusEl.appendChild(optionsLink);
         return;
       }
       statusEl.textContent = `Error: ${response.error}`;
