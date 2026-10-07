@@ -188,7 +188,7 @@ Authorization: Bearer {{token}}
 
 
 #############################################################################
-# E-reader sync (what the kobo-sync skill uses)
+# E-reader sync (what the rigormining skill uses)
 #############################################################################
 
 ### Queue an item to copy to the device (or cancel a pending removal)
@@ -236,6 +236,6 @@ Authorization: Bearer {{token}}
 GET {{api}}/extension/firefox
 Authorization: Bearer {{token}}
 
-### Agent skill zip (kobo-sync)
-GET {{api}}/skills/kobo-sync
+### Agent skill zip (rigormining)
+GET {{api}}/skills/rigormining
 Authorization: Bearer {{token}}

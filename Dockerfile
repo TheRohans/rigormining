@@ -28,8 +28,8 @@ RUN make build VERSION=$VERSION
 FROM alpine:3 AS skills-builder
 WORKDIR /app/skills
 RUN apk add --no-cache zip
-COPY .agents/skills/kobo-sync ./kobo-sync
-RUN zip -r -q kobo-sync.zip kobo-sync
+COPY .agents/skills/rigormining ./rigormining
+RUN zip -r -q rigormining.zip rigormining
 
 # --- backend: build the Go binary ---
 FROM golang:1.25 AS backend-builder
@@ -49,7 +49,7 @@ COPY --from=backend-builder /go/src/gitlab.com/robrohan/rigormining/rigormining-
 COPY --from=backend-builder /go/src/gitlab.com/robrohan/rigormining/migrations ./migrations
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 COPY --from=extension-builder /app/extension/dist ./static/extension
-COPY --from=skills-builder /app/skills/kobo-sync.zip ./static/skills/kobo-sync.zip
+COPY --from=skills-builder /app/skills/rigormining.zip ./static/skills/rigormining.zip
 
 # Falls back to local container disk if nothing is mounted at ./datastore -
 # fine for a quick `make docker_run` smoke test, but on Cloud Run this path

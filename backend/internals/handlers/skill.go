@@ -13,13 +13,13 @@ import (
 // Makefile's skills target - an allowlist, not a passthrough, so this can
 // never be used to read an arbitrary file off Skills.Dir.
 var skillFiles = map[string]string{
-	"kobo-sync": "kobo-sync.zip",
+	"rigormining": "rigormining.zip",
 }
 
 // APIDownloadSkill serves a pre-built agent-skill zip for the "Get
 // Extension" page - someone can download it without cloning the repo and
 // drop the unzipped folder into ~/.agents/skills (see .agents/skills/
-// kobo-sync/SKILL.md and the root Makefile for how the zip is built).
+// rigormining/SKILL.md and the root Makefile for how the zip is built).
 func APIDownloadSkill(e *env.Env) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := mux.Vars(r)["name"]

@@ -24,9 +24,9 @@ extension:
 # "Get Extension" page serves straight out of here in local dev.
 skills:
 	mkdir -p static/skills
-	rm -rf ../.agents/skills/kobo-sync/scripts/__pycache__
-	cd ../.agents/skills && zip -r -q kobo-sync.zip kobo-sync
-	mv ../.agents/skills/kobo-sync.zip static/skills/kobo-sync.zip
+	rm -rf ../.agents/skills/rigormining/scripts/__pycache__
+	cd ../.agents/skills && zip -r -q rigormining.zip rigormining
+	mv ../.agents/skills/rigormining.zip static/skills/rigormining.zip
 
 start:
 	go run -ldflags "-X main.build=$(VERSION)" cmd/server/main.go
